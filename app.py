@@ -1,8 +1,12 @@
+"""Route President"""
 from flask import Flask, render_template, url_for, redirect
+import os
 
 
 app = Flask(__name__)
 host_url = """https://ghastly-vault-37613.herokuapp.com/"""
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 app.route('/')
 def start():
@@ -33,6 +37,7 @@ def login():
 app.route("/register")
 def register():
     """Post new user data to the api"""
+    # render a registration form and parse data to backend
 
 if __name__ == '__main__':
     app.run(debug=True)
