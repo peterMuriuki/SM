@@ -1,6 +1,8 @@
 """Route President"""
 from flask import Flask, render_template, url_for, redirect
+from forms import Loginform, Registrationform
 import os
+import requests
 
 
 app = Flask(__name__)
@@ -37,7 +39,24 @@ def login():
 app.route("/register")
 def register():
     """Post new user data to the api"""
-    # render a registration form and parse data to backend
+    # render a registration form and parse data to backend fields: name, user name, email, and pasword
+    form = Loginform()
+    if form.validate_on_submit():
+      # we have the validate go
+      data = {
+        'name' = form.name.data
+        'user_name' = form.user_name.data
+        'email' = form.email.data
+        'password' = form.password.data
+      }
+      # send the data to api await response and return template accordingly
+      reg_endpoint = host_url + '''users/register'''
+      response = requests.post(reg_endpoint, data=data)
+      if response.status_code == 200:
+        flash("Account Created Succesfully")
+        return redirect(url_for('login'))
+      # ****else conditions
+    return redirect(url_for('register'))
 
 if __name__ == '__main__':
     app.run(debug=True)
