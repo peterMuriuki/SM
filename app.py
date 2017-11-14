@@ -34,13 +34,28 @@ def user_predictions():
 app.route("/login")
 def login():
     """authenticate account with the api so as to receive the api token"""
+    form = Loginform()
+    login_endpoint = host_url + """users/login"""
+    if form.validate_on_submit():
+      # form data processing
+      data = {
+        'user_name': form.user_name.data
+        'password': form.password.data
+      }
+      response = requests.post(login_endpoint, data=data)
+      if response.satatus_code == 200:
+        # succesfully verified-> retrieve the json data and get token
+        respose_data = response.json()
+        token = response_data['token']
+        # add the user to session and redirect to users/dashboard
+      return render_template('admin/login.html', form=form)
 
 
 app.route("/register")
 def register():
     """Post new user data to the api"""
     # render a registration form and parse data to backend fields: name, user name, email, and pasword
-    form = Loginform()
+    form = Registrationform()
     if form.validate_on_submit():
       # we have the validate go
       data = {
@@ -56,7 +71,7 @@ def register():
         flash("Account Created Succesfully")
         return redirect(url_for('login'))
       # ****************** else condition **********************
-    return render_template('admin/register.html')
+    return render_template('admin/register.html' form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
