@@ -55,8 +55,8 @@ def register():
       if response.status_code == 200:
         flash("Account Created Succesfully")
         return redirect(url_for('login'))
-      # ****else conditions
-    return redirect(url_for('register'))
+      # ****************** else condition **********************
+    return render_template('admin/register.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
