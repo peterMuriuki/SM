@@ -1,11 +1,12 @@
-{%extends "base.html" %}
-{% block body %}
+{%extends "admin/base.html" %}
+{%block title%}Eanmble Ts Registration Page{%endblock %}
+{% block content %}
 <form action="url_for('register')", method="POST">
   {{form.csrf_token() }}
   {{form.name.label}}{{form.name()}}
   {{form.user_name.label}}{{form.user_name()}}
   {{form.email.label}}{{form.email()}}
-  {{form.password.label}}{{form.passsword()}}
+  {{form.password.label}}{{form.password()}}
   {{form.repassword.label}}{{form.repassword()}}
   {{form.submit()}}
 </form>
