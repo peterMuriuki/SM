@@ -18,8 +18,8 @@ def start():
 
 @app.route('/landing')
 def home():
-    """landing page render"""
-    return render_template('admin/landing_page.html')
+    """landing page render -> change of plan the landing page will display tables that display the last 2 advisories"""
+    return render_template('landing_page.html')
 
 @app.route('/admin')
 def admin():
@@ -34,13 +34,30 @@ def admin():
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         predictions = pred['predictions']
+    if response.status_code == 403:
+        # unauthorized attempt
+        flash("Session expired please login again")
+        return redirect(url_for('login'))
     
     return render_template('admin/admin.html', predictions=predictions)
 
 @app.route("/users")
 def user_predictions():
     """Renders the approved predictions"""
-    return render_template('admin/user.html')
+    headers = {
+        'x-access-token' : token
+    }
+    pred_url = host_url + '''predictions/'''
+    response = requests.get(pred_url, headers=headers)
+    if response.status_code == 200:
+        # success
+        preds = response.json()  # -> a dictionary with list of dictionaries
+        predictions = pred['predictions']
+    if response.status_code == 403:
+        # unauthorized attempt
+        flash("Session expired please login again")
+        return redirect(url_for('login'))
+    return render_template('user/user.html', predictions=predictions)
 
 @app.route("/login")
 def login():
@@ -62,7 +79,7 @@ def login():
             session['token'] = token
             # should only redirect to users if the logged in person is not an administrator
             return redirect(url_for('admin'))
-    return render_template('admin/login.html', form=form)
+    return render_template('user/login.html', form=form)
 
 
 @app.route('/logout')
@@ -93,12 +110,12 @@ def register():
         # ****************** else condition ********************** like say a condition in which the user has already been registered
         elif response.status_code == 400:
             # problem with the submitted field data -> this verry unlikely to occur
-            return render_template('admin/register.html', form=form)
+            return render_template('user/register.html', form=form)
         else:
             # unknown problems : -> eradicate using tests. u r such a rookie programmer
-            return render_template('admin/register.html', form=form)
+            return render_template('user/register.html', form=form)
       
-    return render_template('admin/register.html', form=form)
+    return render_template('user/register.html', form=form)
 
 @app.route('/about')
 def about():
