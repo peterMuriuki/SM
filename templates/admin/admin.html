@@ -1,25 +1,31 @@
 {% extends "base.html"%}
-{% block body%}
-<table>
-    <tr>
-        <td>fixture</td>
-        <td>time</td>
-        <td>pick</td>
-        <td>odds</td>
-        <td>tipster name</td>
-        <td>Approval status</td>
-    </tr>
-    {% for prediction in predictions%}
+{% block content%}
+{% if predictions|length %}
+    <table>
         <tr>
-            <td>{{prediction['fixture']}}</td>
-            <td>{{prediction['date_time']}}</td>
-            <td>{{prediction['picks']}}</td>
-            <td>{{prediction['odds']}}</td>
-            <td><a href="{{prediction['tipster_url']}}">{{prediction['tipster_name']}}</a></a></td>
-            {% if prediction['approve'] %}
-                <td><a href="">disapprove</a></td>
-            {% else %}
-                <td><a href="">approve</a></td>
+            <td>fixture</td>
+            <td>time</td>
+            <td>pick</td>
+            <td>odds</td>
+            <td>tipster name</td>
+            <td>Approval status</td>
         </tr>
-</table>
+        {% for prediction in predictions%}
+            <tr>
+                <td>{{prediction['fixture']}}</td>
+                <td>{{prediction['date_time']}}</td>
+                <td>{{prediction['picks']}}</td>
+                <td>{{prediction['odds']}}</td>
+                <td><a href="{{prediction['tipster_url']}}">{{prediction['tipster_name']}}</a></a></td>
+                {% if prediction['approve'] %}
+                    <td><a href="">disapprove</a></td>
+                {% else %}
+                    <td><a href="">approve</a></td>
+            </tr>
+    </table>
+{% else %}
+    <div class="jumbotron">
+        <p class="text-center">Today's tips have not yet been loaded, Try again later or tommorrow maybe.</p>
+    </div>
+{% endif %}
 {%endblock%}

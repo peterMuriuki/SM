@@ -1,5 +1,5 @@
 """Route President"""
-from flask import Flask, render_template, url_for, redirect, flash
+from flask import Flask, render_template, url_for, redirect, flash, session
 from forms import LoginForm, RegistrationForm
 import os
 import requests
@@ -33,12 +33,11 @@ def admin():
     if response.status_code == 200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
-        predictions = pred['predictions']
-    if response.status_code == 403:
+        predictions = preds['predictions']
+    if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again")
         return redirect(url_for('login'))
-    
     return render_template('admin/admin.html', predictions=predictions)
 
 @app.route("/users")
@@ -52,14 +51,17 @@ def user_predictions():
     if response.status_code == 200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
-        predictions = pred['predictions']
+        predictions = preds['predictions']
     if response.status_code == 403:
         # unauthorized attempt
         flash("Session expired please login again")
         return redirect(url_for('login'))
+    else:
+        flash("Problem logging in")
+        return redirect(url_for('login'))
     return render_template('user/user.html', predictions=predictions)
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     """authenticate account with the api so as to receive the api token"""
     form = LoginForm()
@@ -72,8 +74,8 @@ def login():
         }
         response = requests.post(login_endpoint, data=data)
         if response.status_code == 200:
-            # succesfully verified-> retrieve the json data and get token
-            respose_data = response.json()
+            # successfully verified-> retrieve the json data and get token
+            response_data = response.json()
             token = response_data['token']
             # add the user to session and redirect to users/dashboard
             session['token'] = token
@@ -88,7 +90,7 @@ def logout():
     session.pop('token', None)
     return redirect(url_for('home'))
 
-@app.route("/register")
+@app.route("/register", methods=['GET', 'POST'])
 def register():
     """Post new user data to the api"""
     # render a registration form and parse data to backend fields: name, user name, email, and pasword
@@ -109,10 +111,10 @@ def register():
             return redirect(url_for('login'))
         # ****************** else condition ********************** like say a condition in which the user has already been registered
         elif response.status_code == 400:
-            # problem with the submitted field data -> this verry unlikely to occur
+            # problem with the submitted field data -> this very unlikely to occur
             return render_template('user/register.html', form=form)
         else:
-            # unknown problems : -> eradicate using tests. u r such a rookie programmer
+            # unknown problems : -> eradicate using tests..> u r such a rookie programmer
             return render_template('user/register.html', form=form)
       
     return render_template('user/register.html', form=form)
