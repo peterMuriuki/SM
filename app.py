@@ -3,6 +3,7 @@ from flask import Flask, render_template, url_for, redirect, flash, session
 from forms import LoginForm, RegistrationForm
 import os
 import requests
+from requests.exceptions import ConnectionError
 
 
 app = Flask(__name__)
@@ -36,7 +37,7 @@ def admin():
         predictions = preds['predictions']
     if response.status_code == 401:
         # unauthorized attempt
-        flash("Session expired please login again")
+        flash("Session expired please login again", 'info')
         return redirect(url_for('login'))
     return render_template('admin/admin.html', predictions=predictions)
 
@@ -54,10 +55,10 @@ def user_predictions():
         predictions = preds['predictions']
     if response.status_code == 403:
         # unauthorized attempt
-        flash("Session expired please login again")
+        flash("Session expired please login again", 'info')
         return redirect(url_for('login'))
     else:
-        flash("Problem logging in")
+        flash("Problem logging in", 'danger')
         return redirect(url_for('login'))
     return render_template('user/user.html', predictions=predictions)
 
@@ -72,7 +73,12 @@ def login():
           'user_name': form.user_name.data,
           'password': form.password.data
         }
-        response = requests.post(login_endpoint, data=data)
+        try:
+            response = requests.post(login_endpoint, data=data)
+        except ConnectionError:
+            # failed to connect to the api due to netwrok issues
+            flash("Problem connecting to Ghastly API", 'warning')
+            return "Try AGain LATer", 500
         if response.status_code == 200:
             # successfully verified-> retrieve the json data and get token
             response_data = response.json()
@@ -105,16 +111,23 @@ def register():
         }
         # send the data to api await response and return template accordingly
         reg_endpoint = host_url + '''users/register'''
-        response = requests.post(reg_endpoint, data=data)
+        try:
+            response = requests.post(reg_endpoint, data=data)
+        except ConnectionError:
+            # failed to connect to the api due to netwrok issues
+            flash("Problem connecting to Ghastly API", 'warning')
+            return "Try AGain LATer", 500
         if response.status_code == 201:
-            flash("Account Created Succesfully")
+            flash("Account Created Succesfully", 'success')
             return redirect(url_for('login'))
         # ****************** else condition ********************** like say a condition in which the user has already been registered
         elif response.status_code == 400:
+            flash("Bad request", 'danger')
             # problem with the submitted field data -> this very unlikely to occur
             return render_template('user/register.html', form=form)
         else:
             # unknown problems : -> eradicate using tests..> u r such a rookie programmer
+            flash("unknown problem {}".format(response.status_code), 'danger')
             return render_template('user/register.html', form=form)
       
     return render_template('user/register.html', form=form)

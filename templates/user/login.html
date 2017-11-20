@@ -1,5 +1,6 @@
-{%extends "base.html" %}
-{% block content %}
+{%extends "lore.html" %}
+{%block title%}Eanmble Ts Login Page{%endblock %}
+{% block form %}
 <form action="{{url_for('login')}}", method="POST">
   {{form.csrf_token() }}
   <div class="form-group">
@@ -8,6 +9,13 @@
   <div class="form-group" >
       {{form.password.label}}{{form.password(class="form-control")}}
     </div>
-  {{ form.submit(class="btn btn-default") }}
+    <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+            {{ form.submit(class='btn login-btn')}}
+
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+    </div>
 </form>
 {% endblock %}

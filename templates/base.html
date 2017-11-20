@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>{%block title%}{%endblock title%}</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{url_for('static', filename='media/favicon.ico')}}"/>
+    <link rel="icon" type='image/x-icon' href="{{ url_for('static', filename='media/favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -38,6 +38,17 @@
     </nav>
     </header>
     <main class="conainer-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
       {% block content%}
       {%endblock content%}
       
