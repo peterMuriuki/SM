@@ -5,10 +5,14 @@ import os
 import requests
 from requests.exceptions import ConnectionError
 
-
+# a few gloabls
 app = Flask(__name__)
 host_url = """https://ghastly-vault-37613.herokuapp.com/"""
 token = None
+headers = {
+        'content-type': "application/json",
+        'cache-control': "no-cache"
+        }
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'YT\x89\xc9\xed\x88K>}\t\x01\xf0\xe6\xc94\\\xde\x85\x96H\x11\x88\xe7\x8b'
 
@@ -26,9 +30,7 @@ def home():
 def admin():
     """display the admin's tips approval page"""
     # here we connect to the api using authentication data provided and then receive the response and parse it on to the template
-    headers = {
-        'x-access-token' : token
-    }
+    headers['x-access-token'] = token
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers)
     if response.status_code == 200:
@@ -69,12 +71,13 @@ def login():
     login_endpoint = host_url + """users/login"""
     if form.validate_on_submit():
         # form data processing
-        data = {
-          'user_name': form.user_name.data,
-          'password': form.password.data
-        }
+        data = '''{
+            
+          'user_name': {},
+          'password': {}
+        }'''. format(form.user_name.data, form.password.data)
         try:
-            response = requests.post(login_endpoint, data=data)
+            response = requests.post(login_endpoint, data=data, headers=headers)
         except ConnectionError:
             # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
@@ -103,16 +106,16 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         # we have the validate go
-        data = {
-            'name' : form.name.data,
-            'user_name' : form.user_name.data,
-            'email' : form.email.data,
-            'password' : form.password.data
-        }
+        data = '''{
+            'name' : {},
+            'user_name' : {},
+            'email' : {},
+            'password' : {}
+        }'''.format(form.name.data, form.user_name.data, form.email.data, form.password.data)
         # send the data to api await response and return template accordingly
         reg_endpoint = host_url + '''users/register'''
         try:
-            response = requests.post(reg_endpoint, data=data)
+            response = requests.post(reg_endpoint, data=data, headers=headers)
         except ConnectionError:
             # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
