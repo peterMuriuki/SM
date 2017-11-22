@@ -1,14 +1,15 @@
 {% extends "base.html"%}
 {% block content%}
 {% if predictions|length %}
-    <table>
+<div class= "table-responsive">
+    <table class="table table-hover table-striped">
         <tr>
-            <td>fixture</td>
-            <td>time</td>
-            <td>pick</td>
-            <td>odds</td>
-            <td>tipster name</td>
-            <td>Approval status</td>
+            <th>fixture</th>
+            <th>time</th>
+            <th>pick</th>
+            <th>odds</th>
+            <th>tipster name</th>
+            <th>Approval status</th>
         </tr>
         {% for prediction in predictions%}
             <tr>
@@ -16,13 +17,16 @@
                 <td>{{prediction['date_time']}}</td>
                 <td>{{prediction['picks']}}</td>
                 <td>{{prediction['odds']}}</td>
-                <td><a href="{{prediction['tipster_url']}}">{{prediction['tipster_name']}}</a></a></td>
+                <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                 {% if prediction['approve'] %}
                     <td><a href="">disapprove</a></td>
                 {% else %}
                     <td><a href="">approve</a></td>
+                {% endif %}
             </tr>
+        {% endfor %}
     </table>
+</div>
 {% else %}
     <div class="jumbotron">
         <p class="text-center">Today's tips have not yet been loaded, Try again later or tommorrow maybe.</p>

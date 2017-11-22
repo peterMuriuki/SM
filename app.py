@@ -86,17 +86,21 @@ def login():
             # successfully verified-> retrieve the json data and get token
             response_data = response.json()
             token = response_data['token']
+            admin = response_data['admin']
             # add the user to session and redirect to users/dashboard
-            session['token'] = token
-            # should only redirect to users if the logged in person is not an administrator
-            return redirect(url_for('admin'))
+            session['user_name'] = form.user_name.data
+            # should only redirect to users if the logged in person is not an administrator -> how do we know that a user is an admin
+            if admin:
+                return redirect(url_for('admin'))
+            else:
+                return redirect(url_for('user_predictions'))
     return render_template('user/login.html', form=form)
 
 
 @app.route('/logout')
 def logout():
     """disowns an in session token"""
-    session.pop('token', None)
+    session.pop('user_name', None)
     return redirect(url_for('home'))
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -142,6 +146,8 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+
 
 
 def log_in():
