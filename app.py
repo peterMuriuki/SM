@@ -71,13 +71,12 @@ def login():
     login_endpoint = host_url + """users/login"""
     if form.validate_on_submit():
         # form data processing
-        data = '''{
-            
-          'user_name': {},
-          'password': {}
-        }'''. format(form.user_name.data, form.password.data)
+        data = {
+          'user_name': form.user_name.data,
+          'password': form.password.data
+        }
         try:
-            response = requests.post(login_endpoint, data=data, headers=headers)
+            response = requests.post(login_endpoint, json=data, headers=headers)
         except ConnectionError:
             # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
@@ -94,6 +93,7 @@ def login():
                 return redirect(url_for('admin'))
             else:
                 return redirect(url_for('user_predictions'))
+        flash('{}'.format(response.status_code), 'danger')
     return render_template('user/login.html', form=form)
 
 
