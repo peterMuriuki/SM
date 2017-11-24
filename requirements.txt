@@ -11,3 +11,4 @@ idna==2.6
 itsdangerous==0.24
 requests==2.18.4
 urllib3==1.22
+gunicorn==19.7.1

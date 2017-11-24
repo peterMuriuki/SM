@@ -2,13 +2,13 @@
 from flask import Flask, render_template, url_for, redirect, flash, session
 from forms import LoginForm, RegistrationForm
 import os
+import json
 import requests
 from requests.exceptions import ConnectionError
 
 # a few gloabls
 app = Flask(__name__)
 host_url = """https://ghastly-vault-37613.herokuapp.com/"""
-token = None
 headers = {
         'content-type': "application/json",
         'cache-control': "no-cache"
@@ -30,7 +30,8 @@ def home():
 def admin():
     """display the admin's tips approval page"""
     # here we connect to the api using authentication data provided and then receive the response and parse it on to the template
-    headers['x-access-token'] = token
+    headers = {}
+    headers['x-access-token'] = session['token']
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers)
     if response.status_code == 200:
@@ -46,6 +47,7 @@ def admin():
 @app.route("/users")
 def user_predictions():
     """Renders the approved predictions"""
+    token = session['token']
     headers = {
         'x-access-token' : token
     }
@@ -76,7 +78,7 @@ def login():
           'password': form.password.data
         }
         try:
-            response = requests.post(login_endpoint, json=data, headers=headers)
+            response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
         except ConnectionError:
             # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
@@ -88,6 +90,7 @@ def login():
             admin = response_data['admin']
             # add the user to session and redirect to users/dashboard
             session['user_name'] = form.user_name.data
+            session['token'] = token
             # should only redirect to users if the logged in person is not an administrator -> how do we know that a user is an admin
             if admin:
                 return redirect(url_for('admin'))
@@ -101,6 +104,7 @@ def login():
 def logout():
     """disowns an in session token"""
     session.pop('user_name', None)
+    session.pop('token', None)
     return redirect(url_for('home'))
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -110,16 +114,16 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         # we have the validate go
-        data = '''{
-            'name' : {},
-            'user_name' : {},
-            'email' : {},
-            'password' : {}
-        }'''.format(form.name.data, form.user_name.data, form.email.data, form.password.data)
+        data = {
+            'name' : form.name.data,
+            'user_name' : form.user_name.data,
+            'email' : form.email.data,
+            'password' : form.password.data
+        }
         # send the data to api await response and return template accordingly
         reg_endpoint = host_url + '''users/register'''
         try:
-            response = requests.post(reg_endpoint, data=data, headers=headers)
+            response = requests.post(reg_endpoint, data=json.dumps(data), headers=headers)
         except ConnectionError:
             # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
