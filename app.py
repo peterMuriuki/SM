@@ -57,9 +57,10 @@ def user_predictions():
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         predictions = preds['predictions']
-    if response.status_code == 403:
+    if response.status_code == 401:
         # unauthorized attempt
-        flash("Session expired please login again", 'info')
+        info = response.json()
+        flash("Session expired please login again,. {}".format(info), 'info')
         return redirect(url_for('login'))
     else:
         flash("Problem logging in", 'danger')
