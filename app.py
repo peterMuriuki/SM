@@ -38,6 +38,7 @@ def admin():
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         predictions = preds['predictions']
+        return render_template('admin/admin.html', predictions=predictions)
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')
@@ -57,13 +58,15 @@ def user_predictions():
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         predictions = preds['predictions']
-    if response.status_code == 401:
+        return render_template('user/user.html', predictions=predictions)
+    elif response.status_code == 401:
         # unauthorized attempt
         info = response.json()
         flash("Session expired please login again,. {}".format(info), 'info')
         return redirect(url_for('login'))
     else:
         flash("Problem logging in", 'danger')
+        print(response, response.json())
         return redirect(url_for('login'))
     return render_template('user/user.html', predictions=predictions)
 
