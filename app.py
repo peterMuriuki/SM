@@ -43,7 +43,6 @@ def admin():
         # unauthorized attempt
         flash("Session expired please login again", 'info')
         return redirect(url_for('login'))
-    return render_template('admin/admin.html', predictions=predictions)
 
 @app.route("/users")
 def user_predictions():
@@ -65,8 +64,7 @@ def user_predictions():
         flash("Session expired please login again,. {}".format(info), 'info')
         return redirect(url_for('login'))
     else:
-        flash("Problem logging in", 'danger')
-        print(response, response.json())
+        flash("Problem logging in, {}".format(response.status_code), 'danger')
         return redirect(url_for('login'))
     return render_template('user/user.html', predictions=predictions)
 
@@ -100,7 +98,7 @@ def login():
                 return redirect(url_for('admin'))
             else:
                 return redirect(url_for('user_predictions'))
-        flash('{}'.format(response.status_code), 'danger')
+        flash('{} {}'.format(response.status_code, response.content), 'danger')
     return render_template('user/login.html', form=form)
 
 
