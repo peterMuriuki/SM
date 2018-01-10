@@ -1,12 +1,12 @@
 """Route President"""
-from flask import Flask, render_template, url_for, redirect, flash, session
-from forms import LoginForm, RegistrationForm
+from flask import Flask, render_template, url_for, redirect, flash, session, request
+from forms import LoginForm, RegistrationForm, ConfirmationForm
 import os
 import json
 import requests
 from requests.exceptions import ConnectionError
 
-# a few gloabls
+# a few globals
 app = Flask(__name__)
 host_url = """https://ghastly-vault-37613.herokuapp.com/"""
 headers = {
@@ -26,28 +26,79 @@ def home():
     """landing page render -> change of plan the landing page will display tables that display the last 2 advisories"""
     return render_template('landing_page.html')
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
     """display the admin's tips approval page"""
     # here we connect to the api using authentication data provided and then receive the response and parse it on to the template
+    form = ConfirmationForm()
     headers = {}
-    headers['x-access-token'] = session['token']
+    try:
+        headers['x-access-token'] = session['token']
+    except KeyError as error:
+        redirect(url_for('login'))
     pred_url = host_url + '''predictions/'''
+    if form.validate_on_submit():
+        # the is some admin actions taking place
+        q = request.args['pred_id']
+        if q is None:
+            # we have an error
+            raise Exception('WE have an error or abort')
+        else:
+            # retrieve the form details and put
+            data = {
+                "comments": form.confirmation_text.data,
+                "approved": True
+            }
+            pred_url += "{}".format(q)
+            _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
+            if _response.status_code == 201:
+                # success
+                return redirect(url_for('admin'))
+            else:
+                flash("Prediction not approved")
+                return redirect(url_for('admin'))
+
     response = requests.get(pred_url, headers=headers)
     if response.status_code == 200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         predictions = preds['predictions']
-        return render_template('admin/admin.html', predictions=predictions)
+        #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
+        approved = []
+        for pred in predictions:
+            if pred['approved']:
+                approved.append(pred)
+        return render_template('admin/admin.html', predictions=predictions, approved=approved, form=form)
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')
-        return redirect(url_for('login'))
+        return redirect(url_for('logout'))
+    else:
+        return redirect(url_for('logout'))
+
+@app.route('/invalidate/<pred_id>')
+def invalidate(pred_id):
+    """:param the predction id of the prediction instance to be invalidated"""
+    pred_url = host_url + '''predictions/{}'''.format(pred_id)
+    data = {
+            "comments": "",
+            "approved": False
+        }
+    _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
+    if _response.status_code == 201:
+        # succesful modification return to admin
+        redirect(url_for('admin'))
+    else:
+        flash("Prediction not validated", 'danger')
+        redirect(url_for('admin'))
 
 @app.route("/users")
 def user_predictions():
     """Renders the approved predictions"""
-    token = session['token']
+    try:
+        token = session['token']
+    except KeyError as error:
+        return redirect('login')
     headers = {
         'x-access-token' : token
     }
@@ -82,7 +133,6 @@ def login():
         try:
             response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
         except ConnectionError:
-            # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
             return "Try AGain LATer", 500
         if response.status_code == 200:
@@ -112,7 +162,7 @@ def logout():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     """Post new user data to the api"""
-    # render a registration form and parse data to backend fields: name, user name, email, and pasword
+    # render a registration form and parse data to backend fields: name, user name, email, and password
     form = RegistrationForm()
     if form.validate_on_submit():
         # we have the validate go
@@ -127,9 +177,8 @@ def register():
         try:
             response = requests.post(reg_endpoint, data=json.dumps(data), headers=headers)
         except ConnectionError:
-            # failed to connect to the api due to netwrok issues
             flash("Problem connecting to Ghastly API", 'warning')
-            return "Try AGain LATer", 500
+            return "<h2>Try AGain LATer</h2>", 500
         if response.status_code == 201:
             flash("Account Created Succesfully", 'success')
             return redirect(url_for('login'))

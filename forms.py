@@ -1,5 +1,5 @@
 """"""
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, InputRequired, Email, length, EqualTo, Regexp
 from flask_wtf import FlaskForm
 
@@ -31,3 +31,10 @@ class LoginForm(FlaskForm):
                                                                     0, 'Name can only contain letters, numbers, or underscores')])
     password = PasswordField('password', validators=[DataRequired(), InputRequired()])
     submit = SubmitField(' log in')
+
+class ConfirmationForm(FlaskForm):
+    """
+    :template for creating the confirmation details for stake and administrators predictions analysis
+    """
+    confirmation_text = TextAreaField('', validators=[InputRequired(), DataRequired(), length(min=500)])
+    submit = SubmitField('confirm')

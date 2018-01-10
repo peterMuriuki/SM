@@ -1,1 +1,46 @@
 {%extends "base.html" %}
+<div class="container-fluid">
+    <div class="row">
+        <!--We are going to center everything inside here-->
+        <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>
+        <div class="users-div col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <h3>Todays Predictions</h3>
+            {% if predictions|length %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <tr>
+                        <th>fixture</th>
+                        <th>time</th>
+                        <th>pick</th>
+                        <th>odds</th>
+                        <th>tipster name</th>
+                        <th>Approval status</th>
+                    </tr>
+                    {% for prediction in predictions%}
+                    <tr>
+                        <td>{{prediction['fixture']}}</td>
+                        <td>{{prediction['date_time']}}</td>
+                        <td>{{prediction['pick']}}</td>
+                        <td>{{prediction['odds']}}</td>
+
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% else %}
+            <div class="jumbotron">
+                <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
+                    maybe.</p>
+            </div>
+            {% endif %}
+            <section class="comments">
+                <h4>Tipster's banter bottomline</h4>
+            </section>
+            <section class="bankroll">
+                <h4> Your wagering Details</h4>
+            </section>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>
+    </div>
+
+</div>
