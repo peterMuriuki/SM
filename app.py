@@ -29,7 +29,7 @@ def home():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     """display the admin's tips approval page"""
-    # here we connect to the api using authentication data provided and then receive the response and parse it on to the template
+    #here we connect to the api using authentication data provided and then receive the response and parse it on to the template
     form = ConfirmationForm()
     headers = {}
     try:
@@ -38,7 +38,7 @@ def admin():
         redirect(url_for('login'))
     pred_url = host_url + '''predictions/'''
     if form.validate_on_submit():
-        # the is some admin actions taking place
+        # there is some admin actions taking place
         q = request.args['pred_id']
         if q is None:
             # we have an error
@@ -53,6 +53,7 @@ def admin():
             _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
             if _response.status_code == 201:
                 # success
+                flash("Prediction approved")
                 return redirect(url_for('admin'))
             else:
                 flash("Prediction not approved")
@@ -182,10 +183,8 @@ def register():
         if response.status_code == 201:
             flash("Account Created Succesfully", 'success')
             return redirect(url_for('login'))
-        # ****************** else condition ********************** like say a condition in which the user has already been registered
         elif response.status_code == 400:
             flash("Bad request", 'danger')
-            # problem with the submitted field data -> this very unlikely to occur
             return render_template('user/register.html', form=form)
         else:
             # unknown problems : -> eradicate using tests..> u r such a rookie programmer
@@ -202,11 +201,6 @@ def about():
 def contact():
     return render_template('contact.html')
 
-
-
-
-def log_in():
-    """For as long as someone's token is valid their account should be active as well-> their email should be inside the session variable"""
 
 if __name__ == '__main__':
     app.run(debug=True)

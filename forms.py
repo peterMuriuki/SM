@@ -36,5 +36,5 @@ class ConfirmationForm(FlaskForm):
     """
     :template for creating the confirmation details for stake and administrators predictions analysis
     """
-    confirmation_text = TextAreaField('', validators=[InputRequired(), DataRequired(), length(min=500)])
+    confirmation_text = TextAreaField('', validators=[InputRequired(), DataRequired(), length(min=0)])
     submit = SubmitField('confirm')
