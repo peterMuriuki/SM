@@ -66,10 +66,14 @@ def admin():
         predictions = preds['predictions']
         #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
         approved = []
+        fields = {}
+        fields['odds'], fields['comments'] = 1, ''
         for pred in predictions:
             if pred['approved']:
                 approved.append(pred)
-        return render_template('admin/admin.html', predictions=predictions, approved=approved, form=form)
+                fields['odds'] *= pred['odds']
+                fields['comment'] += pred['comment']
+        return render_template('admin/admin.html', predictions=predictions, approved=approved, form=form, fields=fields)
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')

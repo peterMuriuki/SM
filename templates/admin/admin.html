@@ -225,23 +225,17 @@
                                 {% endif %}
                             </tr>
                             {% endfor %}
-                            {% for prediction in approved %}
-                            {# what am i doing here? -> consolidating the approved prediction's comments and their odds#}
-                            {% comment, total_odds = '', 1 %}
-                            {% comment = comment + prediction['comments'] %}
-                            {% total_odds *= prediction['odds'] %}
-                            {% endfor %}
                             <tr>
                             <td colspan="7">
                             <div class="jumbotron">
                             <h3>comments: </h3>
-                            <h5>{{ comment }}</h5>
+                            <h5>{{ fields['comment'] }}</h5>
                             <hr>
                             <h3> Total Odds: </h3>
-                            <h5> {{ total_odds }}</h5>
-</div>
-</td>
-</tr>
+                            <h5> {{ fields['odds'] }}</h5>
+                        </div>
+                        </td>
+                        </tr>
                         </table>
                     </div>
                     {% else %}
