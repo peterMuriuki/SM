@@ -46,11 +46,13 @@ def admin():
         else:
             # retrieve the form details and put
             data = {
-                "comments": form.confirmation_text.data,
+                "comment": form.confirmation_text.data,
                 "approved": True
             }
+            print(data)
             pred_url += "{}".format(q)
             _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
+            print(_response.request.__repr__)
             if _response.status_code == 201:
                 # success
                 flash("Prediction approved")
@@ -67,12 +69,13 @@ def admin():
         #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
         approved = []
         fields = {}
-        fields['odds'], fields['comments'] = 1, ''
+        fields['odds'] = 1
+        fields['comment'] = ''
         for pred in predictions:
             if pred['approved']:
                 approved.append(pred)
                 fields['odds'] *= pred['odds']
-                fields['comment'] += pred['comment']
+                fields['comment'] += str(pred['comment'])
         return render_template('admin/admin.html', predictions=predictions, approved=approved, form=form, fields=fields)
     if response.status_code == 401:
         # unauthorized attempt
@@ -86,15 +89,16 @@ def invalidate(pred_id):
     """:param the predction id of the prediction instance to be invalidated"""
     pred_url = host_url + '''predictions/{}'''.format(pred_id)
     data = {
-            "comments": "",
+            "comment": "",
             "approved": False
         }
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
         # succesful modification return to admin
+        flash("Prediction unapproved", "success")
         redirect(url_for('admin'))
     else:
-        flash("Prediction not validated", 'danger')
+        flash("Prediction still valid", 'danger')
         redirect(url_for('admin'))
 
 @app.route("/users")

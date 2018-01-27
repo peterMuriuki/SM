@@ -27,8 +27,8 @@
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
                                 {% if prediction['approved'] %}
-                                <td><a class="pointer" href="#" data-toggle="modal"
-                                       data-target="#disapprove{{prediction['id']}}">
+                                <td><a class="pointer" href="{{ url_for('invalidate', pred_id=prediction['id'],
+                                                _external=True) }}">
                                     <span></span> disapprove </a></td>
                                 {% else %}
                                 <td><a class="pointer" href="#" data-toggle="modal"
@@ -75,35 +75,6 @@
 
 
                                 <!--end of Modal-->
-                                <!-- Modal -->
-                                <div id="disapprove{{prediction['id']}}" class="modal fade" role="dialog">
-                                    <div class="modal-dialog">
-
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close"
-                                                        data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">Disapprove Prediction</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="jumbotron text-danger">
-                                                    Confirm that you wish to dissaprove the prediction
-                                                </div>
-                                                <!--disapproval link as button-->
-                                                <a class="btn btn-default" href="{{ url_for('invalidate', pred_id=prediction['id'],
-                                                _external=True) }}"> Proceed</a>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">back
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <!-- end of modal -->
                                 {% endif %}
                             </tr>
                             {% endfor %}
