@@ -27,7 +27,7 @@
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
                                 {% if prediction['approved'] %}
-                                <td><a class="pointer" href="{{ url_for('invalidate', pred_id=prediction['id'],
+                                <td><a class="pointer" href="{{ url_for('main.invalidate', pred_id=prediction['id'],
                                                 _external=True) }}">
                                     <span></span> disapprove </a></td>
                                 {% else %}
@@ -49,7 +49,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <form class="" method="POST"
-                                                      action="{{ url_for('admin', pred_id=prediction['id'], _external=True) }}">
+                                                      action="{{ url_for('main.admin', pred_id=prediction['id'], _external=True) }}">
                                                     <div class="form-group">
                                                         {{ form.csrf_token }}
                                                         {{ form.confirmation_text() }}
@@ -138,7 +138,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <form class="" method="POST"
-                                                      action="{{ url_for('admin', pred_id=prediction['id'], _external=True) }}">
+                                                      action="{{ url_for('main.admin', pred_id=prediction['id'], _external=True) }}">
                                                     <div class="form-group">
                                                         {{ form.csrf_token }}
                                                         {{ form.confirmation_text() }}
@@ -180,7 +180,7 @@
                                                     Confirm that you wish to dissaprove the prediction
                                                 </div>
                                                 <!--disapproval link as button-->
-                                                <a class="btn btn-default" href="{{ url_for('invalidate', pred_id=prediction['id'],
+                                                <a class="btn btn-default" href="{{ url_for('main.invalidate', pred_id=prediction['id'],
                                                 _external=True) }}"> Proceed</a>
                                             </div>
                                             <div class="modal-footer">

@@ -1,32 +1,31 @@
 """Route President"""
-from flask import Flask, render_template, url_for, redirect, flash, session, request
-from forms import LoginForm, RegistrationForm, ConfirmationForm
+from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint
+from .forms import LoginForm, RegistrationForm, ConfirmationForm
 import os
 import json
 import requests
 from requests.exceptions import ConnectionError
 
+main = Blueprint('main', __name__)
+
 # a few globals
-app = Flask(__name__)
 host_url = """https://ghastly-vault-37613.herokuapp.com/"""
 headers = {
         'content-type': "application/json",
         'cache-control': "no-cache"
         }
 
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'YT\x89\xc9\xed\x88K>}\t\x01\xf0\xe6\xc94\\\xde\x85\x96H\x11\x88\xe7\x8b'
-
-@app.route('/')
+@main.route('/')
 def start():
     """the home page"""
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
-@app.route('/landing')
+@main.route('/landing')
 def home():
     """landing page render -> change of plan the landing page will display tables that display the last 2 advisories"""
     return render_template('landing_page.html')
 
-@app.route('/admin', methods=['GET', 'POST'])
+@main.route('/admin', methods=['GET', 'POST'])
 def admin():
     """display the admin's tips approval page"""
     #here we connect to the api using authentication data provided and then receive the response and parse it on to the template
@@ -35,7 +34,7 @@ def admin():
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
-        redirect(url_for('login'))
+        return redirect(url_for('main.login'))
     pred_url = host_url + '''predictions/'''
     if form.validate_on_submit():
         # there is some admin actions taking place
@@ -56,10 +55,10 @@ def admin():
             if _response.status_code == 201:
                 # success
                 flash("Prediction approved")
-                return redirect(url_for('admin'))
+                return redirect(url_for('main.admin'))
             else:
                 flash("Prediction not approved")
-                return redirect(url_for('admin'))
+                return redirect(url_for('main.admin'))
 
     response = requests.get(pred_url, headers=headers)
     if response.status_code == 200:
@@ -80,11 +79,11 @@ def admin():
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')
-        return redirect(url_for('logout'))
+        return redirect(url_for('main.logout'))
     else:
-        return redirect(url_for('logout'))
+        return redirect(url_for('main.logout'))
 
-@app.route('/invalidate/<pred_id>')
+@main.route('/invalidate/<pred_id>')
 def invalidate(pred_id):
     """:param the predction id of the prediction instance to be invalidated"""
     pred_url = host_url + '''predictions/{}'''.format(pred_id)
@@ -96,18 +95,18 @@ def invalidate(pred_id):
     if _response.status_code == 201:
         # succesful modification return to admin
         flash("Prediction unapproved", "success")
-        redirect(url_for('admin'))
+        return redirect(url_for('main.admin'))
     else:
         flash("Prediction still valid", 'danger')
-        redirect(url_for('admin'))
+        return redirect(url_for('main.admin'))
 
-@app.route("/users")
+@main.route("/users")
 def user_predictions():
     """Renders the approved predictions"""
     try:
         token = session['token']
     except KeyError as error:
-        return redirect('login')
+        return redirect('main.login')
     headers = {
         'x-access-token' : token
     }
@@ -122,13 +121,13 @@ def user_predictions():
         # unauthorized attempt
         info = response.json()
         flash("Session expired please login again,. {}".format(info), 'info')
-        return redirect(url_for('login'))
+        return redirect(url_for('main.login'))
     else:
         flash("Problem logging in, {}".format(response.status_code), 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('main.login'))
     return render_template('user/user.html', predictions=predictions)
 
-@app.route("/login", methods=['GET', 'POST'])
+@main.route("/login", methods=['GET', 'POST'])
 def login():
     """authenticate account with the api so as to receive the api token"""
     form = LoginForm()
@@ -154,21 +153,21 @@ def login():
             session['token'] = token
             # should only redirect to users if the logged in person is not an administrator -> how do we know that a user is an admin
             if admin:
-                return redirect(url_for('admin'))
+                return redirect(url_for('main.admin'))
             else:
-                return redirect(url_for('user_predictions'))
+                return redirect(url_for('main.user_predictions'))
         flash('{} {}'.format(response.status_code, response.content), 'danger')
     return render_template('user/login.html', form=form)
 
 
-@app.route('/logout')
+@main.route('/logout')
 def logout():
     """disowns an in session token"""
     session.pop('user_name', None)
     session.pop('token', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
-@app.route("/register", methods=['GET', 'POST'])
+@main.route("/register", methods=['GET', 'POST'])
 def register():
     """Post new user data to the api"""
     # render a registration form and parse data to backend fields: name, user name, email, and password
@@ -190,7 +189,7 @@ def register():
             return "<h2>Try AGain LATer</h2>", 500
         if response.status_code == 201:
             flash("Account Created Succesfully", 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         elif response.status_code == 400:
             flash("Bad request", 'danger')
             return render_template('user/register.html', form=form)
@@ -201,14 +200,10 @@ def register():
       
     return render_template('user/register.html', form=form)
 
-@app.route('/about')
+@main.route('/about')
 def about():
     return render_template('about.html')
 
-@app.route('/contact')
+@main.route('/contact')
 def contact():
     return render_template('contact.html')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
