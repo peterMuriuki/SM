@@ -1,75 +1,94 @@
 {%extends "base.html" %}
-<div class="container-fluid">
+{% block content %}
+<div class="main-users-div">
     <div class="row">
         <!--We are going to center everything inside here-->
-        <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>
-        <div class="users-div col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <h3>Todays Predictions</h3>
-            {% if predictions|length %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <tr>
-                        <th>fixture</th>
-                        <th>time</th>
-                        <th>pick</th>
-                        <th>odds</th>
-                    </tr>
-                    {% for prediction in predictions%}
-                    <tr>
-                        <td>{{prediction['fixture']}}</td>
-                        <td>{{prediction['date_time']}}</td>
-                        <td>{{prediction['pick']}}</td>
-                        <td>{{prediction['odds']}}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            {% else %}
-            <div class="jumbotron">
+
+        <div class="users-div col-lg-9 col-md-9 col-sm-12 col-xs-12">
+            <section  class="predictions-section">
+                <h3>Todays Predictions</h3>
+                {% if predictions|length %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <tr>
+                            <th>fixture</th>
+                            <th>time</th>
+                            <th>pick</th>
+                            <th>odds</th>
+                        </tr>
+                        {% for prediction in predictions%}
+                        <tr>
+                            <td>{{prediction['fixture']}}</td>
+                            <td>{{prediction['date_time']}}</td>
+                            <td>{{prediction['pick']}}</td>
+                            <td>{{prediction['odds']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% else %}
+                <div class="jumbotron">
                 <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
-                    maybe.</p>
-            </div>
-            {% endif %}
-            <section class="comments">
-                <h4>Tipster's banter bottomline</h4>
+                maybe.</p>
+                </div>
+                {% endif %}
             </section>
-            <section class="bankroll">
-                <h4> Your wagering Details</h4>
+            <hr>
+            <section class="commentary">
+                <h6>Tipster's banter bottomline</h6>
+                <p>{{Commentary}}</p>
+                <h6> Your wagering Details</h6>
+                <ol>
+                    <li>total odds: {{}}</li>
+                    <li>stake: {{}}</li>
+                    <li>Plausible win: {{}}</li>
+                </ol>
             </section>
+            <hr>
             <!--Maybe here we can include predictions from the past day: check from the serevr if the predictions went
             as predicted and then color code them accordingly-->
-            <section>
-            <h3>Yesterday Predictions</h3>
-            {% if past_predictions|length %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <tr>
-                        <th>fixture</th>
-                        <th>time</th>
-                        <th>pick</th>
-                        <th>odds</th>
-                    </tr>
-                    {% for prediction in past_predictions%}
-                    <tr>
-                        <td>{{prediction['fixture']}}</td>
-                        <td>{{prediction['date_time']}}</td>
-                        <td>{{prediction['pick']}}</td>
-                        <td>{{prediction['odds']}}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            {% else %}
-            <div class="jumbotron">
-                <p class="text-center">No records found for Yesterday's Tips.</p>
-            </div>
-</section>
+            <section class="past-data">
+                <h4>Past Predictions</h4>
+                <fieldset>
+                    <legend>Filter Form</legend>
+                    <form class="" action="" method="POST">
+                        <label>date: </label><input type="date">
+                        <input type="button" value="submit">
+                    </form>
+                </fieldset>
+
+                {% if past_predictions|length %}
+                <div class="table-responsive">
+                    <table class="success table table-hover table-striped">
+                        <tr>
+                            <th>fixture</th>
+                            <th>time</th>
+                            <th>pick</th>
+                            <th>odds</th>
+                        </tr>
+                        {% for prediction in past_predictions%}
+                        <tr>
+                            <td>{{prediction['fixture']}}</td>
+                            <td>{{prediction['date_time']}}</td>
+                            <td>{{prediction['pick']}}</td>
+                            <td>{{prediction['odds']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% else %}
+                <div class="jumbotron">
+                    <p class="text-center">No records found for Yesterday's Tips.</p>
+                </div>
+                {% endif %}
+            </section>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>
     </div>
     <aside>
-    <!-- place statistical data here: a graph showing the probable trend in bankroll, at first the trend can be relative
-     ; that is it can be traced on a variable x and not any fixed bankroll amount-->
-</aside>
+        <!-- place statistical data here: a graph showing the probable trend in bankroll, at first the trend can be relative
+         ; that is it can be traced on a variable x and not any fixed bankroll amount-->
+    </aside>
 
 </div>
+{% endblock %}
