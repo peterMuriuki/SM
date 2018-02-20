@@ -1,0 +1,70 @@
+{%extends "base.html" %}
+{% block content %}
+<section id="about">
+    <h2>About</h2>
+
+    <p>i have not figured out what to say here exactly , because am sure it will be something
+        cheesy and i do not want cheesy. fuck, who knew to be a web developer/designer you also had to be a
+        writer. you know look through the contents of the website and you'll definitely be in a position to
+        rationally
+        judge the purpose of Eanmblets. If you still cant, then well good luck mate.</p>
+</section>
+<div id="past-data">
+    <h4>Past Predictions(History)</h4>
+
+        {% for key, value in past_predictions.items() %}
+
+        <table class="table table-hover table-condensed">
+        <thead>
+        <tr>
+            <td colspan="5">
+                date>{{ key }}
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>sport</th>
+            <th>Fixture</th>
+            <th>Pick</th>
+            <th>Odds</th>
+            <th>Result</th>
+        </tr>
+          {% if past_predictions[key]|length %}
+
+          {% for prediction in past_predictions[key] %}
+                <tr>
+            <td>{{ prediction['sport'] }}</td>
+            <td>{{ prediction['fixture'] }} </td>
+            <td>{{ prediction['pick'] }}</td>
+            <td>{{ prediction['odd'] }}</td>
+            <td>{{ prediction['result'] }}</td>
+        </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="5">
+            <div class="jumbotron">
+                        <p class="text-center">Seems like there were no approved predictions for this day.</p>
+                    </div>
+</td>
+
+        </tr>
+          {% endif %}
+          </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="5">
+
+            </td>
+        </tr>
+        </tfoot>
+        </table>
+
+     {% endfor %}
+
+</div>
+{% endblock %}
+
+am having an idea of placing each and every of the other pages here on the landing page,..
+all being the fixed size of the viewport and then use parallax.
