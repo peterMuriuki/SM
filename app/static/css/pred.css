@@ -15,7 +15,7 @@ header{
     margin-bottom:0px;
 }
 #main {
-    border-top: 1px solid black;
+    border-top: 3px solid #ff8bff;
     height: 75%;
     margin-top: 0px;
     background-color: #460950;
@@ -80,7 +80,7 @@ table.fail thead, table.fail tfoot{
 }
 form{
     background-color: white;
-    border: 2px outset #f0e4f5;
+    border: 2px outset #3d0162;
     padding: 40px;
 }
 .form-container{

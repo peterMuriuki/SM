@@ -57,11 +57,62 @@
                                 <td>{{prediction['odds']}}</td>
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
-                                {% if prediction['approved'] %}
-                                <td><a class="pointer" href="{{ url_for('main.invalidate', pred_id=prediction['id'],
+                                {% if prediction['approved'] == 1 %}
+                                {# logical error: this part is unnecessary #}
+                                    <td><a class="pointer" href="{{ url_for('main.unstage', pred_id=prediction['id']) }}" >
+                                        <span></span> unstage </a></td>
+
+                                    {% elif prediction['approved'] == 0 %}
+                                    <td><a class="pointer" href="{{ url_for('main.stage', pred_id=prediction['id']) }}" >
+                                        <span></span> stage </a></td>
+
+                                    {% elif prediction['approved'] == 2 %}
+                                    <td><a class="pointer" href="{{ url_for('main.invalidate', pred_id=prediction['id'],
                                                 _external=True) }}">
                                     <span></span> disapprove </a></td>
-                                {% else %}
+
+
+                                    {% endif %}
+                                </tr>
+
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="jumbotron">
+                        <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
+                            maybe.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="stage-pred">
+                    <div class="staged-preds">
+                        <h3> Staged Predictions </h3>
+                        {% if staged|length %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <tr>
+                                    <th>fixture</th>
+                                    <th>time</th>
+                                    <th>pick</th>
+                                    <th>odds</th>
+                                    <th>tipster name</th>
+                                    <th> count </th>
+                                    <th colspan="2">Approval status</th>
+                                </tr>
+                                {% for prediction in staged%}
+                                <tr>
+                                    <td>{{prediction['fixture']}}</td>
+                                    <td>{{prediction['date_time']}}</td>
+                                    <td>{{prediction['pick']}}</td>
+                                    <td>{{prediction['odds']}}</td>
+                                    <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
+                                    <td>{{ prediction['count'] }}</td>
+                                    {# here we are either unstaging or approving #}
+                                    {% if prediction['approved'] ==  1%}
+                                <td><a class="pointer" href="{{ url_for('main.unstage', pred_id=prediction['id']) }}" >
+                                        <span></span> unstage </a></td>
+
                                 <td><a class="pointer" href="#" data-toggle="modal"
                                        data-target="#approve{{prediction['id']}}">
                                     <span></span> approve </a></td>
@@ -108,50 +159,7 @@
                                 <!--end of Modal-->
                                 {% endif %}
                             </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="jumbotron">
-                        <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
-                            maybe.</p>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="stage-pred">
-                    <div class="staged-preds">
-                        <h3> Staged Predictions </h3>
-                        {% if staged|length %}
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <tr>
-                                    <th>fixture</th>
-                                    <th>time</th>
-                                    <th>pick</th>
-                                    <th>odds</th>
-                                    <th>tipster name</th>
-                                    <th> count </th>
-                                    <th>Approval status</th>
-                                </tr>
-                                {% for prediction in staged%}
-                                <tr>
-                                    <td>{{prediction['fixture']}}</td>
-                                    <td>{{prediction['date_time']}}</td>
-                                    <td>{{prediction['pick']}}</td>
-                                    <td>{{prediction['odds']}}</td>
-                                    <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
-                                    <td>{{ prediction['count'] }}</td>
-                                    {% if prediction['staged'] %}
-                                    <td><a class="pointer" href="{{ }}" >
-                                        <span></span> unstage </a></td>
 
-                                    {% else %}
-                                    <td><a class="pointer" href="{{ }}" >
-                                        <span></span> staged </a></td>
-
-
-                                    {% endif %}
-                                </tr>
                                 {% endfor %}
                             </table>
                         </div>
@@ -184,7 +192,8 @@
                                 <td>{{prediction['odds']}}</td>
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
-                                {% if prediction['approved'] %}
+                                {# Here we can either unstage or disapprove #}
+                                {% if prediction['approved'] == 2 %}
                                 <td><a class="pointer" href="#" data-toggle="modal"
                                        data-target="#disapprove{{prediction['id']}}">
                                     <span></span> disapprove </a></td>
@@ -218,49 +227,6 @@
                                 </div>
 
                                 <!-- end of modal -->
-
-
-                                <!--end of Modal-->
-                                {% else %}
-                                <td><a class="pointer" href="#" data-toggle="modal"
-                                       data-target="#approve{{prediction['id']}}">
-                                    <span></span> approve </a></td>
-
-                                <div id="approve{{prediction['id']}}" class="modal fade" role="dialog">
-                                    <div class="modal-dialog">
-
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close"
-                                                        data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">Approve Prediction</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form class="" method="POST"
-                                                      action="{{ url_for('main.admin', pred_id=prediction['id'], _external=True) }}">
-                                                    <div class="form-group">
-                                                        {{ form.csrf_token }}
-                                                        {{ form.confirmation_text() }}
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-lg-4 col-md-4 col-sm-3 "></div>
-                                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                                                            {{ form.submit(class='btn')}}
-
-                                                        </div>
-                                                        <div class="col-lg-4 col-md-4 col-sm-3 "></div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">back
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
 
 
                                 {% endif %}

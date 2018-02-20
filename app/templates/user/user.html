@@ -6,7 +6,7 @@
 
         <div class="users-div col-lg-9 col-md-9 col-sm-12 col-xs-12">
             <section  class="predictions-section">
-                <h3>Todays Predictions</h3>
+                <h3>Today's Predictions</h3>
                 {% if predictions|length %}
                 <div class="table-responsive">
                     <table class="table table-hover table-striped">
@@ -35,52 +35,92 @@
             </section>
             <hr>
             <section class="commentary">
-                <h6>Tipster's banter bottomline</h6>
-                <p>{{Commentary}}</p>
+                <h5>Tipster's banter bottomline</h5>
+                {% for prediction in predictions%}
+                        <h6>{{ prediction['fixture'] }}</h6>
+                        <p>{{ prediction['comment'] }}</p>
+                        {% endfor %}
                 <h6> Your wagering Details</h6>
-                <ol>
-                    <li>total odds: {{}}</li>
-                    <li>stake: {{}}</li>
-                    <li>Plausible win: {{}}</li>
-                </ol>
+{#                <ol>#}
+{#                    <li>total odds: {{}}</li>#}
+{#                    <li>stake: {{}}</li>#}
+{#                    <li>Plausible win: {{}}</li>#}
+{#                </ol>#}
             </section>
             <hr>
             <!--Maybe here we can include predictions from the past day: check from the serevr if the predictions went
             as predicted and then color code them accordingly-->
             <section class="past-data">
-                <h4>Past Predictions</h4>
+                <h4>Past Predictions(History)</h4>
                 <fieldset>
                     <legend>Filter Form</legend>
-                    <form class="" action="" method="POST">
-                        <label>date: </label><input type="date">
-                        <input type="button" value="submit">
+                    <form class="" action="{{  }}" method="POST">
+                        {{filter_form.csrf_token() }}
+                      <div class="form-group">
+                          {{filter_form.first_date.label}}{{filter_form.first_date(class="form-control", value=_from) }}
+                          {{filter_form.second_date.label}}{{filter_form.second_date(class="form-control", value=_to) }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                {{ filter_form.submit(class='btn login-btn')}}
+
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+                        </div>
                     </form>
                 </fieldset>
 
-                {% if past_predictions|length %}
-                <div class="table-responsive">
-                    <table class="success table table-hover table-striped">
-                        <tr>
-                            <th>fixture</th>
-                            <th>time</th>
-                            <th>pick</th>
-                            <th>odds</th>
-                        </tr>
-                        {% for prediction in past_predictions%}
-                        <tr>
-                            <td>{{prediction['fixture']}}</td>
-                            <td>{{prediction['date_time']}}</td>
-                            <td>{{prediction['pick']}}</td>
-                            <td>{{prediction['odds']}}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                {% else %}
-                <div class="jumbotron">
-                    <p class="text-center">No records found for Yesterday's Tips.</p>
-                </div>
-                {% endif %}
+                {% for key, value in past_predictions.iteritems() %}
+        <table class="table table-hover table-condensed">
+        <thead>
+        <tr>
+            <td colspan="5">
+                date>{{ key }}
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>sport</th>
+            <th>Fixture</th>
+            <th>Pick</th>
+            <th>Odds</th>
+            <th>Result</th>
+        </tr>
+          {% if past_predictions[key]|length %}
+
+          {% for prediction in past_predictions[key] %}
+                <tr>
+            <td>{{ prediction['sport'] }}</td>
+            <td>{{ prediction['fixture'] }} </td>
+            <td>{{ prediction['pick'] }}</td>
+            <td>{{ prediction['odd'] }}</td>
+            <td>{{ prediction['result'] }}</td>
+        </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="5">
+            <div class="jumbotron">
+                        <p class="text-center">Seems like there were no approved predictions for this day.</p>
+                    </div>
+</td>
+
+        </tr>
+          {% endif %}
+          </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="5">
+
+            </td>
+        </tr>
+        </tfoot>
+        </table>
+
+     {% endfor %}
             </section>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>

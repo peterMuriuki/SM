@@ -1,10 +1,11 @@
 """Route President"""
 from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint
-from .forms import LoginForm, RegistrationForm, ConfirmationForm
+from .forms import LoginForm, RegistrationForm, ConfirmationForm, FilterForm, AdminFilterForm
 import os
 import json
 import requests
 from requests.exceptions import ConnectionError
+import datetime
 
 main = Blueprint('main', __name__)
 
@@ -20,23 +21,63 @@ def start():
     """the home page"""
     return redirect(url_for('main.home'))
 
+
 @main.route('/landing')
 def home():
-    """landing page render -> change of plan the landing page will display tables that display the last 2 advisories"""
-    return render_template('landing_page.html')
+    """landing page render -> change of plan the landing page will display tables that display the last several
+     advisories"""
+    today = datetime.date.today()
+    past = today - datetime.timedelta(days=7)
+    start_date = today.strftime('%d-%m-%Y')
+    pred_url = host_url + '''predictions/{}/{}'''.format( past.strftime('%d-%m-%Y'), start_date)
+    response = requests.get(pred_url, headers=headers)
+    if response.status_code == 200:
+        return render_template('landing_page.html', past_predictions=response.json()['predictions'])
+        # that returns a list of dictionaries with keys as datetime.strftime and values as list of predictions
+    else:
+        #return an error page
+        return "<h2>We are experiencing some technical difficulties at the moment</h2>"
+
 
 @main.route('/admin', methods=['GET', 'POST'])
 def admin():
     """display the admin's tips approval page"""
     #here we connect to the api using authentication data provided and then receive the response and parse it on to the template
     form = ConfirmationForm()
+    filter_form = AdminFilterForm()
     headers = {}
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
         return redirect(url_for('main.login'))
     pred_url = host_url + '''predictions/'''
-    if form.validate_on_submit():
+    if filter_form.validate_on_submit() and filter_form.submit.data:
+        """filter paramaters: """
+        date_filter = filter_form.date.data
+        payload = {'q': date_filter}
+        _response = requests.get(pred_url, params=payload)
+
+        if _response.status_code == 200:
+            # success
+            preds = _response.json()  # -> a dictionary with list of dictionaries
+            predictions = preds['predictions']
+            #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
+            approved = []
+            staged = []
+            fields = {}
+            fields['odds'] = 1
+            fields['comment'] = ''
+            for pred in predictions:
+                if pred['approved'] == 2:
+                    approved.append(pred)
+                    fields['odds'] *= pred['odds']
+                    fields['comment'] += str(pred['comment'])
+                elif pred['approved'] == 1:
+                    staged.append(pred)
+            return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
+                               form=form, fields=fields)
+
+    if form.validate_on_submit() and form.submit.data:
         # there is some admin actions taking place
         q = request.args['pred_id']
         if q is None:
@@ -46,7 +87,7 @@ def admin():
             # retrieve the form details and put
             data = {
                 "comment": form.confirmation_text.data,
-                "approved": True
+                "approved": 2
             }
             print(data)
             pred_url += "{}".format(q)
@@ -67,15 +108,19 @@ def admin():
         predictions = preds['predictions']
         #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
         approved = []
+        staged = []
         fields = {}
         fields['odds'] = 1
         fields['comment'] = ''
         for pred in predictions:
-            if pred['approved']:
+            if pred['approved'] == 2:
                 approved.append(pred)
                 fields['odds'] *= pred['odds']
                 fields['comment'] += str(pred['comment'])
-        return render_template('admin/admin.html', predictions=predictions, approved=approved, form=form, fields=fields)
+            elif pred['approved'] == 1:
+                staged.append(pred)
+        return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
+                               form=form, fields=fields)
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')
@@ -85,11 +130,12 @@ def admin():
 
 @main.route('/invalidate/<pred_id>')
 def invalidate(pred_id):
-    """:param the predction id of the prediction instance to be invalidated"""
+    """:param the prediction id of the prediction instance to be invalidated
+    the prediction moves from approved to staged"""
     pred_url = host_url + '''predictions/{}'''.format(pred_id)
     data = {
             "comment": "",
-            "approved": False
+            "approved": 1
         }
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
@@ -98,11 +144,52 @@ def invalidate(pred_id):
         return redirect(url_for('main.admin'))
     else:
         flash("Prediction still valid", 'danger')
+        flash("{}".format(_response.status_code))
+        return redirect(url_for('main.admin'))
+
+
+@main.route('/stage/<pred_id>')
+def stage(pred_id):
+    """"""
+    pred_url = host_url + '''predictions/{}'''.format(pred_id)
+    data = {
+            "comment": "",
+            "approved": 1
+        }
+    _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
+    if _response.status_code == 201:
+        # succesful modification return to admin
+        flash("Prediction unapproved", "success")
+        return redirect(url_for('main.admin'))
+    else:
+        flash("Prediction still valid", 'danger')
+        flash("{}".format(_response.status_code))
+        return redirect(url_for('main.admin'))
+
+
+@main.route('/unstage/<pred_id>')
+def unstage(pred_id):
+    """"""
+    pred_url = host_url + '''predictions/{}'''.format(pred_id)
+    data = {
+            "comment": "",
+            "approved": 0
+        }
+    _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
+    if _response.status_code == 201:
+        # succesful modification return to admin
+        flash("Prediction unapproved", "success")
+        return redirect(url_for('main.admin'))
+    else:
+        flash("Prediction still valid", 'danger')
+        flash("{}".format(_response.status_code))
         return redirect(url_for('main.admin'))
 
 @main.route("/users")
 def user_predictions():
     """Renders the approved predictions"""
+    filter_form = FilterForm()
+    _from, _to = '', ''
     try:
         token = session['token']
     except KeyError as error:
@@ -112,11 +199,25 @@ def user_predictions():
     }
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers)
-    if response.status_code == 200:
+    today = datetime.date.today()
+    past = today - datetime.timedelta(days=7)
+    start_date = today.strftime('%d-%m-%Y')
+    if filter_form.validate_on_submit() and filter_form.submit.data:
+        _from = filter_form.first_date.data
+        _to = filter_form.second_date.data
+        preds_url = host_url + '''predictions/{}/{}'''.format(_from, _to)
+    else:
+        preds_url = host_url + '''predictions/{}/{}'''.format(start_date, past.strftime('%d-%m-%Y'))
+        _from = past.strftime('%Y-%m-%d')
+        _to = today.strftime('%Y-%m-%d')
+    _response = requests.get(preds_url, headers=headers)
+    if response.status_code == 200 and _response.status_code==200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
+        past_predictions = _response.json()['predictions']
         predictions = preds['predictions']
-        return render_template('user/user.html', predictions=predictions)
+        return render_template('user/user.html', predictions=predictions, filter_form=filter_form,
+                               past_predictions= past_predictions, _from=_from, _to=_to)
     elif response.status_code == 401:
         # unauthorized attempt
         info = response.json()
@@ -125,7 +226,7 @@ def user_predictions():
     else:
         flash("Problem logging in, {}".format(response.status_code), 'danger')
         return redirect(url_for('main.login'))
-    return render_template('user/user.html', predictions=predictions)
+
 
 @main.route("/login", methods=['GET', 'POST'])
 def login():
@@ -199,10 +300,6 @@ def register():
             return render_template('user/register.html', form=form)
       
     return render_template('user/register.html', form=form)
-
-@main.route('/about')
-def about():
-    return render_template('about.html')
 
 @main.route('/contact')
 def contact():
