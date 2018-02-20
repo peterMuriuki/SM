@@ -1,0 +1,89 @@
+<DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{%block title%}{%endblock title%}</title>
+        <link rel="icon" type='image/x-icon' href="{{ url_for('static', filename='media/favicon.ico') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+        <!-- Popper JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="../static/css/pred.css">
+    </head>
+    <body>
+    <header>
+
+    </header>
+    <div class="conainer-fluid" id="main">
+
+
+        <div class="main-users-div">
+            <div class="row">
+                <div class="main-pred users-div col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div>
+                        <section id="filter">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+
+                            {% for error in filter_form.errors %}
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                          {{ error }}
+                          </div>
+
+                        {% endfor %}
+
+                            <form action="{{ url_for('index') }}", method="POST">
+                                {{filter_form.csrf_token() }}
+                                <div class="form-group">
+                                    {{filter_form.date.label}}{{filter_form.date(class="form-control")}}</div>
+                                <div class="form-group">
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        {{ filter_form.submit(class='btn login-btn')}}
+
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-3 "></div>
+                                </div>
+                            </form>
+                        </section>
+
+
+                    </div>
+                </div>
+                <div class="side-bankroll col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- we add a date picker-->
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    <footer>
+    </footer>
+    </body>
+
+    </html>
