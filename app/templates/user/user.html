@@ -5,7 +5,7 @@
         <!--We are going to center everything inside here-->
 
         <div class="users-div col-lg-9 col-md-9 col-sm-12 col-xs-12">
-            <section  class="predictions-section">
+            <section class="predictions-section">
                 <h3>Today's Predictions</h3>
                 {% if predictions|length %}
                 <div class="table-responsive">
@@ -28,8 +28,8 @@
                 </div>
                 {% else %}
                 <div class="jumbotron">
-                <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
-                maybe.</p>
+                    <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
+                        maybe.</p>
                 </div>
                 {% endif %}
             </section>
@@ -37,15 +37,25 @@
             <section class="commentary">
                 <h5>Tipster's banter bottomline</h5>
                 {% for prediction in predictions%}
-                        <h6>{{ prediction['fixture'] }}</h6>
-                        <p>{{ prediction['comment'] }}</p>
-                        {% endfor %}
+                <h6>{{ prediction['fixture'] }}</h6>
+
+                <p>{{ prediction['comment'] }}</p>
+                {% endfor %}
                 <h6> Your wagering Details</h6>
-{#                <ol>#}
-{#                    <li>total odds: {{}}</li>#}
-{#                    <li>stake: {{}}</li>#}
-{#                    <li>Plausible win: {{}}</li>#}
-{#                </ol>#}
+                {#
+                <ol>#}
+                    {#
+                    <li>total odds: {{}}</li>
+                    #}
+                    {#
+                    <li>stake: {{}}</li>
+                    #}
+                    {#
+                    <li>Plausible win: {{}}</li>
+                    #}
+                    {#
+                </ol>
+                #}
             </section>
             <hr>
             <!--Maybe here we can include predictions from the past day: check from the serevr if the predictions went
@@ -54,11 +64,13 @@
                 <h4>Past Predictions(History)</h4>
                 <fieldset>
                     <legend>Filter Form</legend>
-                    <form class="" action="{{  }}" method="POST">
+                    <form class="" action="{{ url_for('main.user_predictions') }}" method="POST">
                         {{filter_form.csrf_token() }}
-                      <div class="form-group">
-                          {{filter_form.first_date.label}}{{filter_form.first_date(class="form-control", value=_from) }}
-                          {{filter_form.second_date.label}}{{filter_form.second_date(class="form-control", value=_to) }}
+                        <div class="form-group">
+                            {{filter_form.first_date.label}}{{filter_form.first_date(class="form-control", value=_from, placeholder="Yyyy-mm-dd")
+                            }}
+                            {{filter_form.second_date.label}}{{filter_form.second_date(class="form-control", value=_to, placeholder="Yyyy-mm-dd")
+                            }}
                         </div>
 
                         <div class="row">
@@ -73,54 +85,54 @@
                 </fieldset>
 
                 {% for key, value in past_predictions.iteritems() %}
-        <table class="table table-hover table-condensed">
-        <thead>
-        <tr>
-            <td colspan="5">
-                date>{{ key }}
-            </td>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>sport</th>
-            <th>Fixture</th>
-            <th>Pick</th>
-            <th>Odds</th>
-            <th>Result</th>
-        </tr>
-          {% if past_predictions[key]|length %}
+                <table class="table table-hover table-condensed">
+                    <thead>
+                    <tr>
+                        <td colspan="5">
+                            date>{{ key }}
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>sport</th>
+                        <th>Fixture</th>
+                        <th>Pick</th>
+                        <th>Odds</th>
+                        <th>Result</th>
+                    </tr>
+                    {% if past_predictions[key]|length %}
 
-          {% for prediction in past_predictions[key] %}
-                <tr>
-            <td>{{ prediction['sport'] }}</td>
-            <td>{{ prediction['fixture'] }} </td>
-            <td>{{ prediction['pick'] }}</td>
-            <td>{{ prediction['odd'] }}</td>
-            <td>{{ prediction['result'] }}</td>
-        </tr>
-          {% endfor %}
-          {% else %}
-          <tr>
-            <td colspan="5">
-            <div class="jumbotron">
-                        <p class="text-center">Seems like there were no approved predictions for this day.</p>
-                    </div>
-</td>
+                    {% for prediction in past_predictions[key] %}
+                    <tr>
+                        <td>{{ prediction['sport'] }}</td>
+                        <td>{{ prediction['fixture'] }}</td>
+                        <td>{{ prediction['pick'] }}</td>
+                        <td>{{ prediction['odd'] }}</td>
+                        <td>{{ prediction['result'] }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="jumbotron">
+                                <p class="text-center">Seems like there were no approved predictions for this day.</p>
+                            </div>
+                        </td>
 
-        </tr>
-          {% endif %}
-          </tbody>
-        <tfoot>
-        <tr>
-            <td colspan="5">
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="5">
 
-            </td>
-        </tr>
-        </tfoot>
-        </table>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
 
-     {% endfor %}
+                {% endfor %}
             </section>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-0 col-xs-0"></div>
