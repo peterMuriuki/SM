@@ -46,6 +46,7 @@ def admin():
     form = ConfirmationForm()
     filter_form = AdminFilterForm()
     headers = {}
+    filtered = True
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
@@ -53,7 +54,10 @@ def admin():
     pred_url = host_url + '''predictions/'''
     if filter_form.validate_on_submit() and filter_form.submit.data:
         """filter paramaters: """
-        date_filter = filter_form.date.data
+        date_filter = filter_form.date.data # This is a string of the form yyyy-mm-dd,
+        #  but we need to change it to the form dd-mm-yyyy
+        date_filtered = datetime.datetime.strptime(date_filter, '%Y-%m-%d')
+        date_filter = date_filtered.strftime('%d-%m-%Y')
         payload = {'q': date_filter}
         _response = requests.get(pred_url, params=payload)
 
@@ -74,8 +78,14 @@ def admin():
                     fields['comment'] += str(pred['comment'])
                 elif pred['approved'] == 1:
                     staged.append(pred)
+            if date_filtered == datetime.datetime.strptime(datetime.date.today().strftime('%Y-%m-%d'), '%Y-%m-%d'):
+                filtered = False
+            else:
+                filtered = True
             return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
-                               form=form, fields=fields)
+                               form=form, fields=fields, filtered=filtered)
+        else:
+            return "<h2>Problem with filtered data.</h2>"
 
     if form.validate_on_submit() and form.submit.data:
         # there is some admin actions taking place
