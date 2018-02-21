@@ -16,6 +16,7 @@ headers = {
         'cache-control': "no-cache"
         }
 
+
 @main.route('/')
 def start():
     """the home page"""
@@ -213,8 +214,8 @@ def user_predictions():
     past = today - datetime.timedelta(days=7)
     start_date = today.strftime('%d-%m-%Y')
     if filter_form.validate_on_submit() and filter_form.submit.data:
-        _from = filter_form.first_date.data
-        _to = filter_form.second_date.data
+        _from = datetime.datetime.strptime(filter_form.first_date.data, '%Y-%m-%d').strftime('%d-%m-%Y')
+        _to = datetime.datetime.strptime(filter_form.second_date.data, '%Y-%m-%d').strftime('%d-%m-%Y')
         preds_url = host_url + '''predictions/{}/{}'''.format(_from, _to)
     else:
         preds_url = host_url + '''predictions/{}/{}'''.format(start_date, past.strftime('%d-%m-%Y'))
