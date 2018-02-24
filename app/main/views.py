@@ -205,9 +205,7 @@ def user_predictions():
         token = session['token']
     except KeyError as error:
         return redirect('main.login')
-    headers = {
-        'x-access-token' : token
-    }
+    headers['x-access-token'] = session['token']
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers)
     today = datetime.date.today()
@@ -315,3 +313,21 @@ def register():
 @main.route('/contact')
 def contact():
     return render_template('contact.html')
+
+
+@main.route('/confirm')
+def confirm():
+    """invokes call to email functions that send approved predictions to the users"""
+    request_url = host_url + """/confirm"""
+    try:
+        token = session['token']
+    except KeyError as error:
+        return redirect('main.login')
+    headers['x-access-token'] = session['token']
+    response = requests.get(request_url, headers=headers)
+    if response.status_code == 200:
+        flash("Emails sent", 'success')
+        return redirect('main.admin')
+    else:
+        flash("emails not sent", 'danger')
+        return redirect('main.admin')
