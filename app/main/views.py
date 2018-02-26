@@ -47,7 +47,7 @@ def admin():
     form = ConfirmationForm()
     filter_form = AdminFilterForm()
     headers = {}
-    filtered = True
+    filtered = False
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
@@ -80,11 +80,11 @@ def admin():
                 elif pred['approved'] == 1:
                     staged.append(pred)
             if date_filtered == datetime.datetime.strptime(datetime.date.today().strftime('%Y-%m-%d'), '%Y-%m-%d'):
-                filtered = False
-            else:
                 filtered = True
+            else:
+                filtered = False
             return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
-                               form=form, fields=fields, filtered=filtered)
+                               form=form, fields=fields, filtered=filtered, filter_form=filter_form)
         else:
             return "<h2>Problem with filtered data.</h2>"
 
@@ -131,7 +131,7 @@ def admin():
             elif pred['approved'] == 1:
                 staged.append(pred)
         return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
-                               form=form, fields=fields)
+                               form=form, fields=fields, filter_form=filter_form, filtered=filtered)
     if response.status_code == 401:
         # unauthorized attempt
         flash("Session expired please login again", 'info')
