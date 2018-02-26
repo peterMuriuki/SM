@@ -47,7 +47,7 @@ def admin():
     form = ConfirmationForm()
     filter_form = AdminFilterForm()
     headers = {}
-    filtered = False
+    filtered = True
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
@@ -78,10 +78,10 @@ def admin():
                     fields['comment'] += str(pred['comment'])
                 elif pred['approved'] == 1:
                     staged.append(pred)
-            if date_ == datetime.datetime.strptime(datetime.date.today().strftime('%Y-%m-%d'), '%Y-%m-%d'):
-                filtered = True
-            else:
+            if date_ == datetime.date.today():
                 filtered = False
+            else:
+                filtered = True
             return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
                                form=form, fields=fields, filtered=filtered, filter_form=filter_form)
         else:
