@@ -55,10 +55,9 @@ def admin():
     pred_url = host_url + '''predictions/'''
     if filter_form.validate_on_submit() and filter_form.submit.data:
         """filter paramaters: """
-        date_filter = filter_form.date.data # This is a string of the form yyyy-mm-dd,
+        date_ = filter_form.date.data # This is a string of the form yyyy-mm-dd,
         #  but we need to change it to the form dd-mm-yyyy
-        date_filtered = datetime.datetime.strptime(date_filter, '%Y-%m-%d')
-        date_filter = date_filtered.strftime('%d-%m-%Y')
+        date_filter = date_.strftime('%d-%m-%Y')
         payload = {'q': date_filter}
         _response = requests.get(pred_url, params=payload)
 
@@ -79,7 +78,7 @@ def admin():
                     fields['comment'] += str(pred['comment'])
                 elif pred['approved'] == 1:
                     staged.append(pred)
-            if date_filtered == datetime.datetime.strptime(datetime.date.today().strftime('%Y-%m-%d'), '%Y-%m-%d'):
+            if date_ == datetime.datetime.strptime(datetime.date.today().strftime('%Y-%m-%d'), '%Y-%m-%d'):
                 filtered = True
             else:
                 filtered = False
@@ -212,8 +211,8 @@ def user_predictions():
     past = today - datetime.timedelta(days=7)
     start_date = today.strftime('%d-%m-%Y')
     if filter_form.validate_on_submit() and filter_form.submit.data:
-        _from = datetime.datetime.strptime(filter_form.first_date.data, '%Y-%m-%d').strftime('%d-%m-%Y')
-        _to = datetime.datetime.strptime(filter_form.second_date.data, '%Y-%m-%d').strftime('%d-%m-%Y')
+        _from = filter_form.first_date.data.strftime('%d-%m-%Y')
+        _to = filter_form.second_date.data.strftime('%d-%m-%Y')
         preds_url = host_url + '''predictions/{}/{}'''.format(_from, _to)
     else:
         preds_url = host_url + '''predictions/{}/{}'''.format(start_date, past.strftime('%d-%m-%Y'))
