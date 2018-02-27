@@ -11,26 +11,26 @@ from .._globals import headers, host_url
 main = Blueprint('main', __name__)
 
 @main.route('/')
-def start():
-    """the home page"""
-    return redirect(url_for('main.home'))
-
-
-@main.route('/landing')
 def home():
     """landing page render -> change of plan the landing page will display tables that display the last several
      advisories"""
     today = datetime.date.today()
-    past = today - datetime.timedelta(days=7)
-    start_date = today.strftime('%d-%m-%Y')
-    pred_url = host_url + '''predictions/{}/{}'''.format( past.strftime('%d-%m-%Y'), start_date)
-    response = requests.get(pred_url, headers=headers)
+    past = today - datetime.timedelta(days=5)
+    end_date = today.strftime('%d-%m-%Y')
+    start_date = past.strftime('%d-%m-%Y')
+    payload={
+        '_from': start_date,
+        '_to': end_date,
+        'approved': 2
+    }
+    pred_url = host_url + '''predictions/'''
+    response = requests.get(pred_url, headers=headers, params=payload)
     if response.status_code == 200:
         return render_template('landing_page.html', past_predictions=response.json()['predictions'])
         # that returns a list of dictionaries with keys as datetime.strftime and values as list of predictions
     else:
         #return an error page
-        return "<h2>We are experiencing some technical difficulties at the moment</h2>"
+        abort(404)
 
 
 @main.route('/admin', methods=['GET', 'POST'])

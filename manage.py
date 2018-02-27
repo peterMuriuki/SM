@@ -2,10 +2,11 @@
 from flask_script import Manager, Shell
 from app import create_app
 import os
+from app.users import Users
 
 
 app = create_app(os.environ.get('CONFIGURATION') or 'default')
-manager = Manager(app=app)
+manager = Manager(app=app, Users=Users)
 
 
 def make_shell_context():
