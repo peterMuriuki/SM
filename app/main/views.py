@@ -1,5 +1,5 @@
 """Route President"""
-from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint
+from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app
 from .forms import LoginForm, RegistrationForm, ConfirmationForm, FilterForm, AdminFilterForm
 import os
 import json
@@ -187,6 +187,29 @@ def unstage(pred_id):
         flash("Prediction still valid", 'danger')
         flash("{}".format(_response.status_code))
         return redirect(url_for('main.admin'))
+    
+def api_authenticate():
+    """authenticates to the api and saves the token response to the session"""
+    query_url = host_url + """users/login"""
+    app = current_app._get_current_object()
+    if app.config['CONFIGURATION'] != 'heroku':
+        data = {
+            'user_name': app.config['EANMBLE_ADMIN_USER_NAME'],
+            'password': app.config['EANMBLE_ADMIN_PASSWORD']
+        }
+    else:
+        data = {
+            'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
+            'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
+        }
+    try:
+        response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
+        if response.status_code == 200:
+            token = response.json()['token']
+            session['token'] = token
+    except ConnectionError:
+        raise Exception("Problem connecting to Ghastly API")
+    
 
 @main.route("/users")
 def user_predictions():
@@ -196,22 +219,37 @@ def user_predictions():
     try:
         token = session['token']
     except KeyError as error:
-        return redirect('main.login')
+        # if we do not have a token we re- authenticate to the api
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
+            
     headers['x-access-token'] = session['token']
     pred_url = host_url + '''predictions/'''
-    response = requests.get(pred_url, headers=headers)
+    payload = {
+        '_from':datetime.datetime.today().strftime(%d-%m-%Y)
+        '_to':datetime.datetime.today().strftime(%d-%m-%Y),
+        'approved': 2
+    }
+    response = requests.get(pred_url, headers=headers, params=payload)
     today = datetime.date.today()
     past = today - datetime.timedelta(days=7)
     start_date = today.strftime('%d-%m-%Y')
     if filter_form.validate_on_submit() and filter_form.submit.data:
         _from = filter_form.first_date.data.strftime('%d-%m-%Y')
         _to = filter_form.second_date.data.strftime('%d-%m-%Y')
-        preds_url = host_url + '''predictions/{}/{}'''.format(_from, _to)
     else:
-        preds_url = host_url + '''predictions/{}/{}'''.format(start_date, past.strftime('%d-%m-%Y'))
         _from = past.strftime('%Y-%m-%d')
         _to = today.strftime('%Y-%m-%d')
-    _response = requests.get(preds_url, headers=headers)
+    query = {
+            '_from': _from,
+            '_to': _to
+        }
+    preds_url = host_url + '''predictions/'''
+    _response = requests.get(preds_url, headers=headers, params=query)
+    ##############################################################################################################
     if response.status_code == 200 and _response.status_code==200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
