@@ -7,8 +7,7 @@ import requests
 from requests.exceptions import ConnectionError
 import datetime
 from .._globals import headers, host_url
-
-main = Blueprint('main', __name__)
+from . import main
 
 
 @main.route('/')

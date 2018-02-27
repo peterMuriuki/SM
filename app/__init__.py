@@ -24,7 +24,7 @@ def create_app(configuration_name):
 
     from .main.views import main
     app.register_blueprint(main)
-    from .auth.views import auth
+    from .auth import auth
     app.register_blueprint(auth, url_prefix='/auth')
 
     return app
