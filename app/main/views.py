@@ -6,16 +6,9 @@ import json
 import requests
 from requests.exceptions import ConnectionError
 import datetime
+from .._globals import headers, host_url
 
 main = Blueprint('main', __name__)
-
-# a few globals
-host_url = """https://ghastly-vault-37613.herokuapp.com/"""
-headers = {
-        'content-type': "application/json",
-        'cache-control': "no-cache"
-        }
-
 
 @main.route('/')
 def start():
@@ -236,78 +229,6 @@ def user_predictions():
         return redirect(url_for('main.login'))
 
 
-@main.route("/login", methods=['GET', 'POST'])
-def login():
-    """authenticate account with the api so as to receive the api token"""
-    form = LoginForm()
-    login_endpoint = host_url + """users/login"""
-    if form.validate_on_submit():
-        # form data processing
-        data = {
-          'user_name': form.user_name.data,
-          'password': form.password.data
-        }
-        try:
-            response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
-        except ConnectionError:
-            flash("Problem connecting to Ghastly API", 'warning')
-            return "Try AGain LATer", 500
-        if response.status_code == 200:
-            # successfully verified-> retrieve the json data and get token
-            response_data = response.json()
-            token = response_data['token']
-            admin = response_data['admin']
-            # add the user to session and redirect to users/dashboard
-            session['user_name'] = form.user_name.data
-            session['token'] = token
-            # should only redirect to users if the logged in person is not an administrator -> how do we know that a user is an admin
-            if admin:
-                return redirect(url_for('main.admin'))
-            else:
-                return redirect(url_for('main.user_predictions'))
-        flash('{} {}'.format(response.status_code, response.content), 'danger')
-    return render_template('user/login.html', form=form)
-
-
-@main.route('/logout')
-def logout():
-    """disowns an in session token"""
-    session.pop('user_name', None)
-    session.pop('token', None)
-    return redirect(url_for('main.home'))
-
-@main.route("/register", methods=['GET', 'POST'])
-def register():
-    """Post new user data to the api"""
-    # render a registration form and parse data to backend fields: name, user name, email, and password
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # we have the validate go
-        data = {
-            'name' : form.name.data,
-            'user_name' : form.user_name.data,
-            'email' : form.email.data,
-            'password' : form.password.data
-        }
-        # send the data to api await response and return template accordingly
-        reg_endpoint = host_url + '''users/register'''
-        try:
-            response = requests.post(reg_endpoint, data=json.dumps(data), headers=headers)
-        except ConnectionError:
-            flash("Problem connecting to Ghastly API", 'warning')
-            return "<h2>Try AGain LATer</h2>", 500
-        if response.status_code == 201:
-            flash("Account Created Succesfully", 'success')
-            return redirect(url_for('main.login'))
-        elif response.status_code == 400:
-            flash("Bad request", 'danger')
-            return render_template('user/register.html', form=form)
-        else:
-            # unknown problems : -> eradicate using tests..> u r such a rookie programmer
-            flash("unknown problem {}".format(response.status_code), 'danger')
-            return render_template('user/register.html', form=form)
-      
-    return render_template('user/register.html', form=form)
 
 @main.route('/contact')
 def contact():

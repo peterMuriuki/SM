@@ -1,6 +1,14 @@
 """  declare the application factory (create_app method)"""
 from flask import Flask
 from config import config
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+
+login_manager = LoginManager()
+db = SQLAlchemy()
+
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'auth.login'
 
 
 def create_app(configuration_name):
@@ -11,7 +19,12 @@ def create_app(configuration_name):
     app.config.from_object(config[configuration_name])
     config[configuration_name].init_app(app)
 
+    login_manager.init_app()
+    db.init_app()
+
     from .main.views import main
     app.register_blueprint(main)
+    from .auth.views import auth
+    app.register_blueprint(auth, url_prefix='/auth')
 
     return app

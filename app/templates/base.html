@@ -29,13 +29,13 @@
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav ">
                     <li class="nav-item"><a class="nav-link" href="{{url_for('main.contact')}}">Contact</a></li>
-                    {% if not session['token'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{url_for('main.register')}}"><span
+                    {% if not current_user.is_authenticated() %}
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('auth.register')}}"><span
                             class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{url_for('main.login')}}"><span
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('auth.login')}}"><span
                             class="glyphicon glyphicon-log-in"></span> Login</a></li>
                     {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{{url_for('main.logout')}}"><span
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('auth.logout')}}"><span
                             class="glyphicon glyphicon-log-in"></span> Logout</a></li>
                     {% endif %}
                 </ul>

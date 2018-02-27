@@ -1,11 +1,12 @@
 """Define User class template and behaviours"""
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
+from . import db, login_manager
 
-class Users(db.Model):
+
+class Users(UserMixin, db.Model):
     __table_name__ = "users"
-    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80))
     user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
@@ -18,7 +19,7 @@ class Users(db.Model):
     @password.setter
     def password(self, password):
         """Generates the password hash"""
-        self.password =  generate_password_hash(password)
+        self.password = generate_password_hash(password)
 
     @property
     def password(self):
@@ -56,3 +57,8 @@ class Users(db.Model):
         if not isinstance(phone_number, str):
             raise ValueError("Unexpected input for phone number, should be string")
         self.phone_number = phone_number
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
