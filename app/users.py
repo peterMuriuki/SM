@@ -1,7 +1,10 @@
 """Define User class template and behaviours"""
 from flask_login import UserMixin
+from flask import current_app
+from sqlalchemy.exc import OperationalError
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, login_manager
+import os
 
 
 class Users(UserMixin, db.Model):
@@ -57,6 +60,53 @@ class Users(UserMixin, db.Model):
         if not isinstance(phone_number, str):
             raise ValueError("Unexpected input for phone number, should be string")
         self.phone_number = phone_number
+
+    @staticmethod
+    def insert_test_admin():
+        """ add the super user admin"""
+        db.drop_all()
+        db.create_all()
+        app = current_app._get_current_object()
+        name = app.config['EANMBLE_ADMIN_NAME']
+        email = app.config['EANMBLE_ADMIN_EMAIL']
+        password = app.config['EANMBLE_ADMIN_PASSWORD']
+        user_name = app.config['EANMBLE_ADMIN_USER_NAME']
+        admin = True
+        phone_number = app.config['EANMBLE_ADMIN_PHONE_NUMBER']
+        bankroll = None
+        plan = None
+        admin = Users(name = name, user_name=user_name, email=email, password=password,
+                      admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        try:
+            db.session.add(admin)
+            db.session.commit()
+        except OperationalError as e:
+            db.session.rollback()
+            return False
+        return True
+
+    @staticmethod
+    def insert_admin():
+        """Add a test super user account"""
+        db.drop_all()
+        db.create_all()
+        name = os.environ.get('EANMBLE_ADMIN_NAME')
+        email = os.environ.get('EANMBLE_ADMIN_EMAIL')
+        password = os.environ.get('EANMBLE_ADMIN_PASSWORD')
+        user_name = os.environ.get('EANMBLE_ADMIN_USER_NAME')
+        admin = True
+        phone_number = os.environ.get('EANMBLE_ADMIN_PHONE_NUMBER')
+        bankroll = None
+        plan = None
+        admin = Users(name = name, user_name=user_name, email=email, password=password,
+                      admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
+        try:
+            db.session.add(admin)
+            db.session.commit()
+        except OperationalError as e:
+            db.session.rollback()
+            return False
+        return True
 
 
 @login_manager.user_loader

@@ -14,5 +14,16 @@ def make_shell_context():
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 
+
+@manager.command
+def deploy():
+    """Define all the deploy operations once and in a encapsulated manner """
+    # create the tables
+
+    if os.environ['CONFIGURATION'] == 'production' or os.environ['CONFIGURATION'] == 'heroku':
+        Users.insert_admin() # will wok for all application configurations
+    else:
+        Users.insert_test_admin()
+
 if __name__ == '__main__':
     manager.run()
