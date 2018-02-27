@@ -1,5 +1,5 @@
 """Route President"""
-from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app
+from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app, abort
 from .forms import LoginForm, RegistrationForm, ConfirmationForm, FilterForm, AdminFilterForm
 import os
 import json
@@ -9,6 +9,7 @@ import datetime
 from .._globals import headers, host_url
 
 main = Blueprint('main', __name__)
+
 
 @main.route('/')
 def home():
@@ -33,44 +34,81 @@ def home():
         abort(404)
 
 
+def api_authenticate():
+    """authenticates to the api and saves the token response to the session"""
+    query_url = host_url + """users/login"""
+    app = current_app._get_current_object()
+    if app.config['CONFIGURATION'] != 'heroku':
+        data = {
+            'user_name': app.config['EANMBLE_ADMIN_USER_NAME'],
+            'password': app.config['EANMBLE_ADMIN_PASSWORD']
+        }
+    else:
+        data = {
+            'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
+            'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
+        }
+    try:
+        login_endpoint = host_url + """users/login"""
+        response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
+        if response.status_code == 200:
+            token = response.json()['token']
+            session['token'] = token
+    except ConnectionError:
+        raise Exception("Problem connecting to Ghastly API")
+
+
+def parse_predictions(predictions):
+    """:parameter: a list of predictions
+    :returns a tuple consisting of approved, staged, comments of approved, and odds of approved"""
+    approved = []
+    staged = []
+    fields = {}
+    fields['odds'] = 1
+    fields['comment'] = ''
+    for pred in predictions:
+        if pred['approved'] == 2:
+            approved.append(pred)
+            fields['odds'] *= pred['odds']
+            fields['comment'] += str(pred['comment'])
+        elif pred['approved'] == 1:
+            staged.append(pred)
+    return approved, staged, fields
+
+
 @main.route('/admin', methods=['GET', 'POST'])
 def admin():
     """display the admin's tips approval page"""
-    #here we connect to the api using authentication data provided and then receive the response and parse it on to the template
+    #  here we connect to the api using authentication data provided and then
+    #  receive the response and parse it on to the template
     form = ConfirmationForm()
     filter_form = AdminFilterForm()
-    headers = {}
     filtered = True
     try:
         headers['x-access-token'] = session['token']
     except KeyError as error:
-        return redirect(url_for('main.login'))
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
+
     pred_url = host_url + '''predictions/'''
     if filter_form.validate_on_submit() and filter_form.submit.data:
         """filter paramaters: """
-        date_ = filter_form.date.data # This is a string of the form yyyy-mm-dd,
-        #  but we need to change it to the form dd-mm-yyyy
+        date_ = filter_form.date.data # this is a datetime class object
         date_filter = date_.strftime('%d-%m-%Y')
-        payload = {'q': date_filter}
-        _response = requests.get(pred_url, params=payload)
+        payload = {'_from': date_filter,
+                   '_to': date_filter
+                   }
+        _response = requests.get(pred_url, params=payload, headers=headers)
 
         if _response.status_code == 200:
             # success
             preds = _response.json()  # -> a dictionary with list of dictionaries
-            predictions = preds['predictions']
+            predictions = preds['predictions'][payload['_from']]
             #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
-            approved = []
-            staged = []
-            fields = {}
-            fields['odds'] = 1
-            fields['comment'] = ''
-            for pred in predictions:
-                if pred['approved'] == 2:
-                    approved.append(pred)
-                    fields['odds'] *= pred['odds']
-                    fields['comment'] += str(pred['comment'])
-                elif pred['approved'] == 1:
-                    staged.append(pred)
+            approved, staged, fields = parse_predictions(predictions)
             if date_ == datetime.date.today():
                 filtered = False
             else:
@@ -78,7 +116,8 @@ def admin():
             return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
                                form=form, fields=fields, filtered=filtered, filter_form=filter_form)
         else:
-            return "<h2>Problem with filtered data.</h2>"
+            flash("<h2>Problem with filtered data.</h2>", 'danger')
+            abort(404)
 
     if form.validate_on_submit() and form.submit.data:
         # there is some admin actions taking place
@@ -92,10 +131,8 @@ def admin():
                 "comment": form.confirmation_text.data,
                 "approved": 2
             }
-            print(data)
-            pred_url += "{}".format(q)
-            _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
-            print(_response.request.__repr__)
+            _pred_url = pred_url + "{}".format(q)
+            _response = requests.put(_pred_url, data=json.dumps(data), headers=headers)
             if _response.status_code == 201:
                 # success
                 flash("Prediction approved")
@@ -104,32 +141,31 @@ def admin():
                 flash("Prediction not approved")
                 return redirect(url_for('main.admin'))
 
-    response = requests.get(pred_url, headers=headers)
+    date_ = datetime.datetime.today()
+    date_filter = date_.strftime('%d-%m-%Y')
+    payload = {
+        '_from': date_filter,
+        '_to': date_filter
+        }
+    response = requests.get(pred_url, headers=headers, params=payload)
     if response.status_code == 200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
-        predictions = preds['predictions']
+        predictions = preds['predictions'][payload['_from']]
         #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
-        approved = []
-        staged = []
-        fields = {}
-        fields['odds'] = 1
-        fields['comment'] = ''
-        for pred in predictions:
-            if pred['approved'] == 2:
-                approved.append(pred)
-                fields['odds'] *= pred['odds']
-                fields['comment'] += str(pred['comment'])
-            elif pred['approved'] == 1:
-                staged.append(pred)
+        approved, staged, fields = parse_predictions(predictions)
         return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
                                form=form, fields=fields, filter_form=filter_form, filtered=filtered)
     if response.status_code == 401:
         # unauthorized attempt
-        flash("Session expired please login again", 'info')
-        return redirect(url_for('main.logout'))
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
     else:
-        return redirect(url_for('main.logout'))
+        abort(404)
+
 
 @main.route('/invalidate/<pred_id>')
 def invalidate(pred_id):
@@ -140,6 +176,16 @@ def invalidate(pred_id):
             "comment": "",
             "approved": 1
         }
+    try:
+        token = session['token']
+    except KeyError as error:
+        # if we do not have a token we re- authenticate to the api
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
+    headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
         # succesful modification return to admin
@@ -159,6 +205,16 @@ def stage(pred_id):
             "comment": "",
             "approved": 1
         }
+    try:
+        token = session['token']
+    except KeyError as error:
+        # if we do not have a token we re- authenticate to the api
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
+    headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
         # succesful modification return to admin
@@ -178,6 +234,16 @@ def unstage(pred_id):
             "comment": "",
             "approved": 0
         }
+    try:
+        token = session['token']
+    except KeyError as error:
+        # if we do not have a token we re- authenticate to the api
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
+    headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
         # succesful modification return to admin
@@ -187,29 +253,7 @@ def unstage(pred_id):
         flash("Prediction still valid", 'danger')
         flash("{}".format(_response.status_code))
         return redirect(url_for('main.admin'))
-    
-def api_authenticate():
-    """authenticates to the api and saves the token response to the session"""
-    query_url = host_url + """users/login"""
-    app = current_app._get_current_object()
-    if app.config['CONFIGURATION'] != 'heroku':
-        data = {
-            'user_name': app.config['EANMBLE_ADMIN_USER_NAME'],
-            'password': app.config['EANMBLE_ADMIN_PASSWORD']
-        }
-    else:
-        data = {
-            'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
-            'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
-        }
-    try:
-        response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
-        if response.status_code == 200:
-            token = response.json()['token']
-            session['token'] = token
-    except ConnectionError:
-        raise Exception("Problem connecting to Ghastly API")
-    
+
 
 @main.route("/users")
 def user_predictions():
@@ -229,14 +273,13 @@ def user_predictions():
     headers['x-access-token'] = session['token']
     pred_url = host_url + '''predictions/'''
     payload = {
-        '_from':datetime.datetime.today().strftime(%d-%m-%Y)
-        '_to':datetime.datetime.today().strftime(%d-%m-%Y),
+        '_from': datetime.datetime.today().strftime('%d-%m-%Y'),
+        '_to': datetime.datetime.today().strftime('%d-%m-%Y'),
         'approved': 2
     }
     response = requests.get(pred_url, headers=headers, params=payload)
     today = datetime.date.today()
-    past = today - datetime.timedelta(days=7)
-    start_date = today.strftime('%d-%m-%Y')
+    past = today - datetime.timedelta(days=5)
     if filter_form.validate_on_submit() and filter_form.submit.data:
         _from = filter_form.first_date.data.strftime('%d-%m-%Y')
         _to = filter_form.second_date.data.strftime('%d-%m-%Y')
@@ -245,27 +288,27 @@ def user_predictions():
         _to = today.strftime('%Y-%m-%d')
     query = {
             '_from': _from,
-            '_to': _to
+            '_to': _to,
+            'approved': 2
         }
     preds_url = host_url + '''predictions/'''
     _response = requests.get(preds_url, headers=headers, params=query)
-    ##############################################################################################################
     if response.status_code == 200 and _response.status_code==200:
         # success
         preds = response.json()  # -> a dictionary with list of dictionaries
         past_predictions = _response.json()['predictions']
-        predictions = preds['predictions']
+        predictions = preds['predictions'][payload['_from']]
         return render_template('user/user.html', predictions=predictions, filter_form=filter_form,
                                past_predictions= past_predictions, _from=_from, _to=_to)
     elif response.status_code == 401:
         # unauthorized attempt
-        info = response.json()
-        flash("Session expired please login again,. {}".format(info), 'info')
-        return redirect(url_for('main.login'))
+        try:
+            api_authenticate()
+        except Exception as error:
+            flash(error, 'danger')
+            return redirect('auth.logout')
     else:
-        flash("Problem logging in, {}".format(response.status_code), 'danger')
-        return redirect(url_for('main.login'))
-
+        abort(404)
 
 
 @main.route('/contact')
@@ -276,16 +319,4 @@ def contact():
 @main.route('/confirm')
 def confirm():
     """invokes call to email functions that send approved predictions to the users"""
-    request_url = host_url + """/confirm"""
-    try:
-        token = session['token']
-    except KeyError as error:
-        return redirect('main.login')
-    headers['x-access-token'] = session['token']
-    response = requests.get(request_url, headers=headers)
-    if response.status_code == 200:
-        flash("Emails sent", 'success')
-        return redirect('main.admin')
-    else:
-        flash("emails not sent", 'danger')
-        return redirect('main.admin')
+    pass
