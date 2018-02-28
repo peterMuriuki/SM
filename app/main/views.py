@@ -23,6 +23,15 @@ def home():
         '_to': end_date,
         'approved': 2
     }
+    try:
+        Headers["token"] = session["token"]
+    except KeyError as error:
+        try:
+            api_authenticate()
+        except Exception as e:
+            flash(e, "danger")
+            Abort(404)
+        
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers, params=payload)
     if response.status_code == 200:
