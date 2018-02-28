@@ -10,6 +10,19 @@ from .._globals import headers, host_url
 from . import main
 
 
+def set_header_token():
+    try:
+        headers['x-access-token'] = session['token']
+    except KeyError as error:
+        try:
+            api_authenticate()
+        except ConnectionError as e:
+            flash(e, "danger")
+            abort(500)
+    headers['x-access-token'] = session['token']
+    return
+
+
 @main.route('/')
 def home():
     """landing page render -> change of plan the landing page will display tables that display the last several
@@ -23,15 +36,9 @@ def home():
         '_to': end_date,
         'approved': 2
     }
-    try:
-        Headers["token"] = session["token"]
-    except KeyError as error:
-        try:
-            api_authenticate()
-        except Exception as e:
-            flash(e, "danger")
-            Abort(404)
-        
+
+    set_header_token()
+
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers, params=payload)
     if response.status_code == 200:
@@ -46,24 +53,25 @@ def api_authenticate():
     """authenticates to the api and saves the token response to the session"""
     query_url = host_url + """users/login"""
     app = current_app._get_current_object()
-    if app.config['CONFIGURATION'] != 'heroku':
-        data = {
+    if os.environ.get('CONFIGURATION') != 'heroku':
+        payload = {
             'user_name': app.config['EANMBLE_ADMIN_USER_NAME'],
             'password': app.config['EANMBLE_ADMIN_PASSWORD']
         }
     else:
-        data = {
+        payload = {
             'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
             'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
         }
     try:
-        login_endpoint = host_url + """users/login"""
-        response = requests.post(login_endpoint, data=json.dumps(data), headers=headers)
+        response = requests.post(query_url, data=json.dumps(payload))
         if response.status_code == 200:
             token = response.json()['token']
             session['token'] = token
+        else:
+            raise Exception(str(response.status_code) + str(response.json()))
     except ConnectionError:
-        raise Exception("Problem connecting to Ghastly API")
+        raise ConnectionError("Problem connecting to Ghastly API")
 
 
 def parse_predictions(predictions):
@@ -92,14 +100,8 @@ def admin():
     form = ConfirmationForm()
     filter_form = AdminFilterForm()
     filtered = True
-    try:
-        headers['x-access-token'] = session['token']
-    except KeyError as error:
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+
+    set_header_token()
 
     pred_url = host_url + '''predictions/'''
     if filter_form.validate_on_submit() and filter_form.submit.data:
@@ -166,11 +168,8 @@ def admin():
                                form=form, fields=fields, filter_form=filter_form, filtered=filtered)
     if response.status_code == 401:
         # unauthorized attempt
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+        set_header_token()
+        return redirect('main.admin')
     else:
         abort(404)
 
@@ -184,15 +183,9 @@ def invalidate(pred_id):
             "comment": "",
             "approved": 1
         }
-    try:
-        token = session['token']
-    except KeyError as error:
-        # if we do not have a token we re- authenticate to the api
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+
+    set_header_token()
+
     headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
@@ -213,15 +206,9 @@ def stage(pred_id):
             "comment": "",
             "approved": 1
         }
-    try:
-        token = session['token']
-    except KeyError as error:
-        # if we do not have a token we re- authenticate to the api
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+
+    set_header_token()
+
     headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
@@ -242,15 +229,9 @@ def unstage(pred_id):
             "comment": "",
             "approved": 0
         }
-    try:
-        token = session['token']
-    except KeyError as error:
-        # if we do not have a token we re- authenticate to the api
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+
+    set_header_token()
+
     headers['token'] = session['token']
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
@@ -268,16 +249,9 @@ def user_predictions():
     """Renders the approved predictions"""
     filter_form = FilterForm()
     _from, _to = '', ''
-    try:
-        token = session['token']
-    except KeyError as error:
-        # if we do not have a token we re- authenticate to the api
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
-            
+
+    set_header_token()
+
     headers['x-access-token'] = session['token']
     pred_url = host_url + '''predictions/'''
     payload = {
@@ -310,11 +284,8 @@ def user_predictions():
                                past_predictions= past_predictions, _from=_from, _to=_to)
     elif response.status_code == 401:
         # unauthorized attempt
-        try:
-            api_authenticate()
-        except Exception as error:
-            flash(error, 'danger')
-            return redirect('auth.logout')
+        set_header_token()
+        return redirect('main.user_predictions')
     else:
         abort(404)
 
