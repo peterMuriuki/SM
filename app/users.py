@@ -13,16 +13,16 @@ class Users(UserMixin, db.Model):
     name = db.Column(db.String(80))
     user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128))
     phone_number = db.Column(db.String(), nullable=True)
     admin = db.Column(db.Boolean())
     plan = db.Column(db.String(10), nullable=True)
     bankroll = db.Column(db.Float())
 
-    @password.setter
-    def password(self, password):
+
+    def _set_password(self, password):
         """Generates the password hash"""
-        self.password = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password)
 
     @property
     def password(self):
@@ -30,14 +30,14 @@ class Users(UserMixin, db.Model):
         raise AttributeError('Password is write only')
 
     def verify_password(self, password):
-        return check_password_hash(self.password, password)
+        return check_password_hash(self.password_hash, password)
 
     def __init__(self, name, user_name, email, password, admin=False, phone_number=None, bankroll=None, plan=None):
         self.name = name
         self.email = email
         self.admin = admin
         self.user_name = user_name
-        self.password(password)
+        self._set_password(password)
 
     def __repr__(self):
         """__repr__"""

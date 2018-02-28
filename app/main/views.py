@@ -1,6 +1,6 @@
 """Route President"""
 from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app, abort
-from .forms import LoginForm, RegistrationForm, ConfirmationForm, FilterForm, AdminFilterForm
+from .forms import ConfirmationForm, FilterForm, AdminFilterForm
 import os
 import json
 import requests
@@ -29,7 +29,7 @@ def home():
         return render_template('landing_page.html', past_predictions=response.json()['predictions'])
         # that returns a list of dictionaries with keys as datetime.strftime and values as list of predictions
     else:
-        #return an error page
+        # return an error page
         abort(404)
 
 

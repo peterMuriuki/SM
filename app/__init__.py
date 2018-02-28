@@ -19,8 +19,8 @@ def create_app(configuration_name):
     app.config.from_object(config[configuration_name])
     config[configuration_name].init_app(app)
 
-    login_manager.init_app()
-    db.init_app()
+    login_manager.init_app(app)
+    db.init_app(app)
 
     from .main.views import main
     app.register_blueprint(main)
