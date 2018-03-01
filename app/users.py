@@ -9,7 +9,7 @@ import os
 
 class Users(UserMixin, db.Model):
     __table_name__ = "users"
-    user_id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80))
     user_name = db.Column(db.String(40))
     email = db.Column(db.String(50), unique=True)
@@ -60,6 +60,11 @@ class Users(UserMixin, db.Model):
         if not isinstance(phone_number, str):
             raise ValueError("Unexpected input for phone number, should be string")
         self.phone_number = phone_number
+        
+    def insert_user(self):
+        """Adds a new user object to the database"""
+        db.session.add(self)
+        db.session.commit()
 
     @staticmethod
     def insert_test_admin():
@@ -110,5 +115,5 @@ class Users(UserMixin, db.Model):
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return Users.query.get(int(user_id))
+def load_user(id):
+    return Users.query.get(int(id))

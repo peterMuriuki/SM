@@ -9,6 +9,7 @@ class Gear(object):
         """:parameters: email, user_name, name, password:
         :returns: True if successfully registered, False otherwise"""
         user = Users(data['name'], data['user_name'], data['email'], data['password'])
+        user.insert_user
         return user
 
     @staticmethod

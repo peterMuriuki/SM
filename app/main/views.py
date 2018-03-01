@@ -52,19 +52,13 @@ def home():
 def api_authenticate():
     """authenticates to the api and saves the token response to the session"""
     query_url = host_url + """users/login"""
-    app = current_app._get_current_object()
-    if os.environ.get('CONFIGURATION') != 'heroku':
-        payload = {
-            'user_name': app.config['EANMBLE_ADMIN_USER_NAME'],
-            'password': app.config['EANMBLE_ADMIN_PASSWORD']
-        }
-    else:
-        payload = {
-            'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
-            'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
-        }
+
+    payload = {
+        'user_name': os.environ.get('EANMBLE_ADMIN_USER_NAME'),
+        'password': os.environ.get('EANMBLE_ADMIN_PASSWORD')
+    }
     try:
-        response = requests.post(query_url, data=json.dumps(payload))
+        response = requests.post(query_url, data=json.dumps(payload), headers=headers)
         if response.status_code == 200:
             token = response.json()['token']
             session['token'] = token
@@ -169,7 +163,7 @@ def admin():
     if response.status_code == 401:
         # unauthorized attempt
         set_header_token()
-        return redirect('main.admin')
+        return redirect(url_for('main.admin'))
     else:
         abort(404)
 
@@ -285,7 +279,7 @@ def user_predictions():
     elif response.status_code == 401:
         # unauthorized attempt
         set_header_token()
-        return redirect('main.user_predictions')
+        return redirect(url_for('main.user_predictions'))
     else:
         abort(404)
 

@@ -24,12 +24,12 @@ def login():
             # we have a valid user
             login_user(user, remember=data['remember'])
             if user.admin:
-                return redirect('main.admin')
+                return redirect(url_for('main.admin'))
             else:
-                return redirect('main.user_predictions')
+                return redirect(url_for('main.user_predictions'))
         else:
             flash("Could not find the user", 'danger')
-            return redirect('auth.login')
+            return redirect(url_for('auth.login'))
     return render_template('user/login.html', form=form)
 
 
@@ -56,7 +56,7 @@ def register():
         registered_user = gear.register_user(data)
         if registered_user:
             # redirect to the login page
-            return redirect('auth.login')
+            return redirect(url_for('auth.login'))
         else:
-            return redirect('auth.register')
+            return redirect(url_for('auth.register'))
     return render_template('user/register.html', form=form)
