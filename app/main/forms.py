@@ -38,7 +38,7 @@ class EmailProfile(FlaskForm):
     
 class PasswordProfile(flaskForm):
     """Template for changing and modfying the password"""
-    old_password = PasswordField('current password: ', validators=[length(min=8, max=100)])
+    old_password = PasswordField('current password: ', validators=[DataRequired(), InputRequired(),length(min=8, max=100)])
     new_password = PasswordField('new password: ', validators=[DataRequired(), InputRequired(), length(min=8, max=100), EqualTo('repassword', message='Passwords should match')])
     repassword = PasswordField('confirm new Password: ', validators=[DataRequired(), length(min=8, max=100), InputRequired()])
     submit = SubmitField('SAVE')

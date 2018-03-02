@@ -18,3 +18,14 @@ class Gear(object):
         """:parameter: a string representing the username
         :returns the user object that is associated with the specified user_name"""
         return Users.query.filter_by(user_name = user_name).first()
+    
+    @staticmethod
+    def modify_user_data(user_obj, email=None, password=None, plan=None):
+        """:params: any changeable attribute of a user instance i.e. email, password, plan,"""
+        if password is not None:
+            user_obj.update_password(password)
+        if email is not None:
+            user_obj.update_email(email)
+        if plan is not None:
+            user_obj.update_plan(plan)
+        return user_obj

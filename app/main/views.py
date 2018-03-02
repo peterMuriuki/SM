@@ -1,6 +1,7 @@
 """Route President"""
 from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app, abort
-from .forms import ConfirmationForm, FilterForm, AdminFilterForm
+from flask-login import current_user, login_required
+from .forms import ConfirmationForm, FilterForm, AdminFilterForm, GeneralProfile, EmailProfile, PasswordProfile, SecondaryProfile
 import os
 import json
 import requests
@@ -92,6 +93,7 @@ def parse_predictions(predictions):
 
 
 @main.route('/admin', methods=['GET', 'POST'])
+@login_required
 def admin():
     """display the admin's tips approval page"""
     #  here we connect to the api using authentication data provided and then
@@ -174,6 +176,7 @@ def admin():
 
 
 @main.route('/invalidate/<pred_id>')
+@login_required
 def invalidate(pred_id):
     """:param the prediction id of the prediction instance to be invalidated
     the prediction moves from approved to staged"""
@@ -198,6 +201,7 @@ def invalidate(pred_id):
 
 
 @main.route('/stage/<pred_id>')
+@login_required
 def stage(pred_id):
     """"""
     pred_url = host_url + '''predictions/{}'''.format(pred_id)
@@ -221,6 +225,7 @@ def stage(pred_id):
 
 
 @main.route('/unstage/<pred_id>')
+@login_required
 def unstage(pred_id):
     """"""
     pred_url = host_url + '''predictions/{}'''.format(pred_id)
@@ -244,6 +249,7 @@ def unstage(pred_id):
 
 
 @main.route("/users", methods=['POST', 'GET'])
+@login_required
 def user_predictions():
     """Renders the approved predictions"""
     filter_form = FilterForm()
@@ -288,6 +294,48 @@ def user_predictions():
         return redirect(url_for('main.user_predictions'))
     else:
         abort(404)
+        
+        
+@main.route('/profile', methods=["POST", "GET"])
+@login_required
+def profile():
+    """:
+    : modify a users db details  
+    """
+    #forms
+    general_form = GeneralProfile()
+    password_form = PasswordProfile()
+    email_form = EmailProfile()
+    secondary_form = SecondaryProfile()
+    
+    if general_form.validate_on_submit() and general_form.submit.data:
+        # this has disabled functionality for the time being
+        pass
+    if password_form.validate_on_submit() and password_form.submit.data:
+        current_password = password_form.old_password.data
+        new_password = password_form.new_password.data
+        # we need to change the password and relogin the user and redirect them to the profile page
+        pass
+    if email_form.validate_on_submit() and eamil_form.submit.data:
+        user = gear.load_user_by_user_name(current_user.user_name)
+        if user is not None:
+            if user.verify_password(email_form.password.data):
+                gear.modify_user_data(user, email=email_form.email.data)
+                return redirect(url_for('main.profile'))
+            else:
+                flash("Authentication error")
+                return redirect(url('main.profile'))
+        else:
+            #this should never happen, logically.
+            pass
+    if secondary_form.validate_on_submit() and secondary_form.submit.data:
+        user = gear.load_user_by_user_name(current_user.user_name)
+        if user is not None:
+            gear.modify_user_data(user, plan=secondary_form.plan.data)
+            return redirect(url_for('main.profile'))
+    user = gear.load_user_by_user_name(current_user)    
+    return render_template('profile.html', general_form=general_form, password_form=password_form, email_form=email_form, secondary_form=secondary_form, user=user)
+    
 
 
 @main.route('/contact')
@@ -296,6 +344,7 @@ def contact():
 
 
 @main.route('/confirm')
+@login_required
 def confirm():
     """invokes call to email functions that send approved predictions to the users"""
     pass

@@ -65,6 +65,24 @@ class Users(UserMixin, db.Model):
         """Adds a new user object to the database"""
         db.session.add(self)
         db.session.commit()
+        
+    def update_email(self, email):
+        """speaks for itself: parameter: a string representing the email"""
+        self.email = email
+        db.session.commit()
+        return
+    
+    def update_plan(self, plan):
+        """:parameter: plan as a string"""
+        self.plan = plan
+        db.session.commit()
+        return
+    
+    def update_password(self, password):
+        """:parameter: password as a string"""
+        self._set_password(password)
+        db.session.commit()
+        return
 
     @staticmethod
     def insert_test_admin():
