@@ -60,7 +60,7 @@ class Users(UserMixin, db.Model):
         if not isinstance(phone_number, str):
             raise ValueError("Unexpected input for phone number, should be string")
         self.phone_number = phone_number
-        
+
     def insert_user(self):
         """Adds a new user object to the database"""
         db.session.add(self)
