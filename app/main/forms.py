@@ -20,3 +20,5 @@ class AdminFilterForm(FlaskForm):
     """Templates the filter functions; these are to be used to request predictions more specifically"""
     date = DateField('date:', validators=[InputRequired(), DataRequired()])
     submit = SubmitField('filter')
+    
+   

@@ -22,6 +22,11 @@ def set_header_token():
     headers['x-access-token'] = session['token']
     return
 
+def form_date_render(date_string):
+    """:parameter: a date frmatted string of the form d m y
+    :returns : a date formatted string of the form y m date
+    """
+    return datetime.datetime.strptime(date_string, '%d-%m-%Y').strftime('%Y-%m-%d')
 
 @main.route('/')
 def home():
@@ -238,7 +243,7 @@ def unstage(pred_id):
         return redirect(url_for('main.admin'))
 
 
-@main.route("/users")
+@main.route("/users", methods=['POST', 'GET'])
 def user_predictions():
     """Renders the approved predictions"""
     filter_form = FilterForm()
@@ -259,9 +264,10 @@ def user_predictions():
     if filter_form.validate_on_submit() and filter_form.submit.data:
         _from = filter_form.first_date.data.strftime('%d-%m-%Y')
         _to = filter_form.second_date.data.strftime('%d-%m-%Y')
+        print(" I succesfully submitted")
     else:
-        _from = past.strftime('%Y-%m-%d')
-        _to = today.strftime('%Y-%m-%d')
+        _from = past.strftime('%d-%m-%Y')
+        _to = today.strftime('%d-%m-%Y')
     query = {
             '_from': _from,
             '_to': _to,
@@ -275,7 +281,7 @@ def user_predictions():
         past_predictions = _response.json()['predictions']
         predictions = preds['predictions'][payload['_from']]
         return render_template('user/user.html', predictions=predictions, filter_form=filter_form,
-                               past_predictions= past_predictions, _from=_from, _to=_to)
+                               past_predictions= past_predictions, _from=form_date_render(_from), _to=form_date_render(_to))
     elif response.status_code == 401:
         # unauthorized attempt
         set_header_token()

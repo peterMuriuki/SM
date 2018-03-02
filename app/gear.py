@@ -9,8 +9,9 @@ class Gear(object):
         """:parameters: email, user_name, name, password:
         :returns: True if successfully registered, False otherwise"""
         user = Users(data['name'], data['user_name'], data['email'], data['password'])
-        user.insert_user
-        return user
+        user.insert_user()
+        this = Gear.load_user_by_user_name(user.user_name)
+        return this
 
     @staticmethod
     def load_user_by_user_name(user_name):

@@ -65,6 +65,14 @@
                 <fieldset>
                     <legend>Filter Form</legend>
                     <form class="" action="{{ url_for('main.user_predictions') }}" method="POST">
+                        {% for error in filter_form.errors %}
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            {{ error }}
+                        </div>
+
+                        {% endfor %}
                         {{filter_form.csrf_token() }}
                         <div class="form-group">
                             {{filter_form.first_date.label}}{{filter_form.first_date(class="form-control", value=_from, placeholder="Yyyy-mm-dd")
