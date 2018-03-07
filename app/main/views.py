@@ -1,7 +1,7 @@
 """Route President"""
 from flask import Flask, render_template, url_for, redirect, flash, session, request, Blueprint, current_app, abort
-from flask-login import current_user, login_required
-from .forms import ConfirmationForm, FilterForm, AdminFilterForm, GeneralProfile, EmailProfile, PasswordProfile, SecondaryProfile
+from flask_login import current_user, login_required
+from .forms import ConfirmationForm, FilterForm, AdminFilterForm
 import os
 import json
 import requests
@@ -296,46 +296,6 @@ def user_predictions():
         abort(404)
         
         
-@main.route('/profile', methods=["POST", "GET"])
-@login_required
-def profile():
-    """:
-    : modify a users db details  
-    """
-    #forms
-    general_form = GeneralProfile()
-    password_form = PasswordProfile()
-    email_form = EmailProfile()
-    secondary_form = SecondaryProfile()
-    
-    if general_form.validate_on_submit() and general_form.submit.data:
-        # this has disabled functionality for the time being
-        pass
-    if password_form.validate_on_submit() and password_form.submit.data:
-        current_password = password_form.old_password.data
-        new_password = password_form.new_password.data
-        # we need to change the password and relogin the user and redirect them to the profile page
-        pass
-    if email_form.validate_on_submit() and eamil_form.submit.data:
-        user = gear.load_user_by_user_name(current_user.user_name)
-        if user is not None:
-            if user.verify_password(email_form.password.data):
-                gear.modify_user_data(user, email=email_form.email.data)
-                return redirect(url_for('main.profile'))
-            else:
-                flash("Authentication error")
-                return redirect(url('main.profile'))
-        else:
-            #this should never happen, logically.
-            pass
-    if secondary_form.validate_on_submit() and secondary_form.submit.data:
-        user = gear.load_user_by_user_name(current_user.user_name)
-        if user is not None:
-            gear.modify_user_data(user, plan=secondary_form.plan.data)
-            return redirect(url_for('main.profile'))
-    user = gear.load_user_by_user_name(current_user)    
-    return render_template('profile.html', general_form=general_form, password_form=password_form, email_form=email_form, secondary_form=secondary_form, user=user)
-    
 
 
 @main.route('/contact')

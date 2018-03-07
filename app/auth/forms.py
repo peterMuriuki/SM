@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, SubmitField, StringField, BooleanField
+from wtforms import PasswordField, SubmitField, StringField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, length, Regexp, EqualTo, InputRequired
 
 
@@ -31,3 +31,30 @@ class LoginForm(FlaskForm):
     password = PasswordField('password', validators=[DataRequired(), InputRequired()])
     rem = BooleanField('Keep me logged in')
     submit = SubmitField(' log in')
+
+class GeneralProfile(FlaskForm):
+    """Templating the profile page's form for user data modification"""
+    name = StringField('Name: ', validators=[ length(5, 64),
+                                        Regexp('^[A-Za-z][A-Za-z0-9_ ]*$', 0, 'Name can only contain numbers, space or underscores')])
+    user_name = StringField('user name: ', validators=[length(min=3, max=50), Regexp('^[A-Za-z][A-Za-z0-9_]*$',
+                                                                    0, 'Name can only contain letters, numbers, or underscores')])
+    submit = SubmitField('SAVED')
+    
+class EmailProfile(FlaskForm):
+    """Template for changing and modifying the email"""
+    email = StringField('New Email: ', validators=[DataRequired(), InputRequired(), Email()])
+    password = PasswordField('Password Authentication: ', validators=[DataRequired(), length(min=8, max=100), InputRequired()])
+    submit = SubmitField('SAVE')
+    
+    
+class PasswordProfile(FlaskForm):
+    """Template for changing and modfying the password"""
+    old_password = PasswordField('current password: ', validators=[DataRequired(), InputRequired(),length(min=8, max=100)])
+    new_password = PasswordField('new password: ', validators=[DataRequired(), InputRequired(), length(min=8, max=100), EqualTo('repassword', message='Passwords should match')])
+    repassword = PasswordField('confirm new Password: ', validators=[DataRequired(), length(min=8, max=100), InputRequired()])
+    submit = SubmitField('SAVE')
+    
+class SecondaryProfile(FlaskForm):
+    """Dont even ask"""
+    plan = SelectField('plan: ', choices=[('dob','double or nothing')])
+    submit = SubmitField('SAVE')

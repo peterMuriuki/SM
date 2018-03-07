@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash
 from . import auth
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, GeneralProfile, PasswordProfile, SecondaryProfile, EmailProfile
 from flask_login import login_user, login_required, logout_user, current_user
 from ..gear import Gear
 
@@ -60,3 +60,43 @@ def register():
         else:
             return redirect(url_for('auth.register'))
     return render_template('user/register.html', form=form)
+
+@auth.route('/profile', methods=["POST", "GET"])
+@login_required
+def profile():
+    """:
+    : modify a users db details  
+    """
+    #forms
+    general_form = GeneralProfile()
+    password_form = PasswordProfile()
+    email_form = EmailProfile()
+    secondary_form = SecondaryProfile()
+    
+    if general_form.validate_on_submit() and general_form.submit.data:
+        # this has disabled functionality for the time being
+        pass
+    if password_form.validate_on_submit() and password_form.submit.data:
+        current_password = password_form.old_password.data
+        new_password = password_form.new_password.data
+        # we need to change the password and relogin the user and redirect them to the profile page
+        pass
+    if email_form.validate_on_submit() and eamil_form.submit.data:
+        user = gear.load_user_by_user_name(current_user.user_name)
+        if user is not None:
+            if user.verify_password(email_form.password.data):
+                gear.modify_user_data(user, email=email_form.email.data)
+                return redirect(url_for('main.profile'))
+            else:
+                flash("Authentication error")
+                return redirect(url('main.profile'))
+        else:
+            #this should never happen, logically.
+            pass
+    if secondary_form.validate_on_submit() and secondary_form.submit.data:
+        user = gear.load_user_by_user_name(current_user.user_name)
+        if user is not None:
+            gear.modify_user_data(user, plan=secondary_form.plan.data)
+            return redirect(url_for('main.profile'))
+    user = gear.load_user_by_user_name('dapet')    
+    return render_template('user/profile.html', general_form=general_form, password_form=password_form, email_form=email_form, secondary_form=secondary_form, user=user)
