@@ -80,16 +80,20 @@ def profile():
         current_password = password_form.old_password.data
         new_password = password_form.new_password.data
         # we need to change the password and relogin the user and redirect them to the profile page
-        pass
+        user = gear.load_user_by_user_name(current_user.user_name)
+        if user is not None:
+            if user.verify_password(current_password):
+                gear.modify_user_data(user, password=new_password)
+                return redirect(url_for('auth.profile'))
     if email_form.validate_on_submit() and eamil_form.submit.data:
         user = gear.load_user_by_user_name(current_user.user_name)
         if user is not None:
             if user.verify_password(email_form.password.data):
                 gear.modify_user_data(user, email=email_form.email.data)
-                return redirect(url_for('main.profile'))
+                return redirect(url_for('auth.profile'))
             else:
                 flash("Authentication error")
-                return redirect(url('main.profile'))
+                return redirect(url('auth.profile'))
         else:
             #this should never happen, logically.
             pass
@@ -97,6 +101,6 @@ def profile():
         user = gear.load_user_by_user_name(current_user.user_name)
         if user is not None:
             gear.modify_user_data(user, plan=secondary_form.plan.data)
-            return redirect(url_for('main.profile'))
+            return redirect(url_for('auth.profile'))
     user = gear.load_user_by_user_name('dapet')    
     return render_template('user/profile.html', general_form=general_form, password_form=password_form, email_form=email_form, secondary_form=secondary_form, user=user)
