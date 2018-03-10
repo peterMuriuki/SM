@@ -23,11 +23,13 @@ def set_header_token():
     headers['x-access-token'] = session['token']
     return
 
+
 def form_date_render(date_string):
     """:parameter: a date frmatted string of the form d m y
     :returns : a date formatted string of the form y m date
     """
     return datetime.datetime.strptime(date_string, '%d-%m-%Y').strftime('%Y-%m-%d')
+
 
 @main.route('/')
 def home():
@@ -118,7 +120,7 @@ def admin():
             # success
             preds = _response.json()  # -> a dictionary with list of dictionaries
             predictions = preds['predictions'][payload['_from']]
-            #separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
+            # separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
             approved, staged, fields = parse_predictions(predictions)
             if date_ == datetime.date.today():
                 filtered = False

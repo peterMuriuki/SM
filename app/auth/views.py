@@ -98,7 +98,7 @@ def profile():
                 flash("Email Authentication error", 'danger')
                 return redirect(url_for('auth.profile'))
         else:
-            #this should never happen, logically.
+            # this should never happen, logically.
             pass
     if secondary_form.validate_on_submit() and secondary_form.submit.data:
         user = gear.load_user_by_user_name(current_user.user_name)
