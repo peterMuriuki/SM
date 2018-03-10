@@ -87,8 +87,6 @@ class Users(UserMixin, db.Model):
     @staticmethod
     def insert_test_admin():
         """ add the super user admin"""
-        db.drop_all()
-        db.create_all()
         app = current_app._get_current_object()
         name = app.config['EANMBLE_ADMIN_NAME']
         email = app.config['EANMBLE_ADMIN_EMAIL']
@@ -111,8 +109,6 @@ class Users(UserMixin, db.Model):
     @staticmethod
     def insert_admin():
         """Add a test super user account"""
-        db.drop_all()
-        db.create_all()
         name = os.environ.get('EANMBLE_ADMIN_NAME')
         email = os.environ.get('EANMBLE_ADMIN_EMAIL')
         password = os.environ.get('EANMBLE_ADMIN_PASSWORD')

@@ -22,6 +22,13 @@ manager.add_command('shell', Shell(make_context=make_shell_context))
 def deploy():
     """Define all the deploy operations once and in a encapsulated manner """
     # create the tables
+    def create_temp_database():
+        database_base_uri = os.path.join(os.path.dirname(__file__), 'app', 'files', 'db', 'prod.db')
+        if os.path.exists(database_base_uri):
+            pass
+        else:
+            os.mkdir(database_base_uri)
+    create_temp_database()
     db.drop_all()
     db.create_all()
 
