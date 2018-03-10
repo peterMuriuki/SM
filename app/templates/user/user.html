@@ -5,11 +5,11 @@
         <!--We are going to center everything inside here-->
 
         <div class="users-div col-lg-9 col-md-9 col-sm-12 col-xs-12">
-            <section class="predictions-section">
-                <h3>Today's Predictions</h3>
+            <section class="predictions-section table-div">
+                <h3 class="table-h">Today's Predictions</h3>
                 {% if predictions|length %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped">
+
+                    <table class="">
                         <tr>
                             <th>fixture</th>
                             <th>time</th>
@@ -25,9 +25,8 @@
                         </tr>
                         {% endfor %}
                     </table>
-                </div>
                 {% else %}
-                <div class="jumbotron">
+                <div class="">
                     <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
                         maybe.</p>
                 </div>
@@ -93,14 +92,9 @@
                 </fieldset>
 
                 {% for key, value in past_predictions.items() %}
-                <table class="table table-hover table-condensed">
-                    <thead>
-                    <tr>
-                        <td colspan="5">
-                            date>{{ key }}
-                        </td>
-                    </tr>
-                    </thead>
+                <div class="table-div">
+                <h6 class="table-h">date>{{ key }}</h6>
+                <table class="">
                     <tbody>
                     <tr>
                         <th>sport</th>
@@ -123,7 +117,7 @@
                     {% else %}
                     <tr>
                         <td colspan="5">
-                            <div class="jumbotron">
+                            <div class="">
                                 <p class="text-center">Seems like there were no approved predictions for this day.</p>
                             </div>
                         </td>
@@ -131,14 +125,8 @@
                     </tr>
                     {% endif %}
                     </tbody>
-                    <tfoot>
-                    <tr>
-                        <td colspan="5">
-
-                        </td>
-                    </tr>
-                    </tfoot>
                 </table>
+                </div>
 
                 {% endfor %}
             </section>

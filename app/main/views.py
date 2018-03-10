@@ -34,7 +34,7 @@ def home():
     """landing page render -> change of plan the landing page will display tables that display the last several
      advisories"""
     today = datetime.date.today()
-    past = today - datetime.timedelta(days=5)
+    past = today - datetime.timedelta(days=2)
     end_date = today.strftime('%d-%m-%Y')
     start_date = past.strftime('%d-%m-%Y')
     payload={

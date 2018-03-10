@@ -14,9 +14,9 @@ class FilterForm(FlaskForm):
     """Templates the filter functions; these are to be used to request predictions more specifically"""
     first_date = DateField('from:', validators=[InputRequired(), DataRequired()])
     second_date = DateField('to:', validators=[InputRequired(), DataRequired()])
-    submit = SubmitField('SAVE')
+    submit = SubmitField('FILTER')
 
 class AdminFilterForm(FlaskForm):
     """Templates the filter functions; these are to be used to request predictions more specifically"""
     date = DateField('date:', validators=[InputRequired(), DataRequired()])
-    submit = SubmitField('SAVE')
+    submit = SubmitField('FILTER')

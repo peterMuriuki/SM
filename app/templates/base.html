@@ -23,6 +23,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-expand-md bg-dark navbar-dark">
             <a class="navbar-brand" href="{{url_for('main.home')}}">EANMBLETS.com</a>
+            <div class="nav-right">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -49,9 +50,10 @@
                     {% endif %}
                 </ul>
             </div>
+            </div>
         </nav>
     </header>
-    <div class="conainer-fluid" id="main">
+    <div class="conainer-fluid main" id="main">
 
 
         {% with messages = get_flashed_messages(with_categories=true) %}

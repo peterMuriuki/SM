@@ -38,11 +38,11 @@
                     </form>
                 </section>
 
-                <div class="all-preds">
-                    <h3> All Predictions </h3>
+                <div class="all-preds table-div">
+                    <h3 class="table-h"> All Predictions </h3>
                     {% if predictions|length %}
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped">
+                        <table class="">
                             <tr>
                                 <th>fixture</th>
                                 <th>time</th>
@@ -97,18 +97,18 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="jumbotron">
+                    <div class="">
                         <p class="text-center">Today's tips have not yet been loaded, Try again later or tomorrow
                             maybe.</p>
                     </div>
                     {% endif %}
                 </div>
                 <div class="stage-pred">
-                    <div class="staged-preds">
-                        <h3> Staged Predictions </h3>
+                    <div class="staged-preds table-div">
+                        <h3 class="table-h"> Staged Predictions </h3>
                         {% if staged|length %}
                         <div class="table-responsive">
-                            <table class="table table-hover table-striped">
+                            <table class="">
                                 <tr>
                                     <th>fixture</th>
                                     <th>time</th>
@@ -195,17 +195,17 @@
                             </table>
                         </div>
                         {% else %}
-                        <div class="jumbotron">
+                        <div class="">
                             <p class="text-center">You have not Approved any of today's tips, yet.</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
-                <div class="approved-preds">
-                    <h3> Approved Predictions </h3>
+                <div class="approved-preds table-div">
+                    <h3 class="table-h"> Approved Predictions </h3>
                     {% if appoved|length %}
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped">
+                        <table class="">
                             <tr>
                                 <th>fixture</th>
                                 <th>time</th>
@@ -246,7 +246,7 @@
                                                 <h4 class="modal-title">Disapprove Prediction</h4>
                                             </div>
                                             <div class="modal-body">
-                                                <div class="jumbotron text-danger">
+                                                <div class=" text-danger">
                                                     Confirm that you wish to dissaprove the prediction
                                                 </div>
                                                 <!--disapproval link as button-->
@@ -276,7 +276,7 @@
                             {% endfor %}
                             <tr>
                                 <td colspan="7">
-                                    <div class="jumbotron">
+                                    <div class="">
                                         <h3>comments: </h3>
                                         <h5>{{ fields['comment'] }}</h5>
                                         <hr>
@@ -288,7 +288,7 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="jumbotron">
+                    <div class="">
                         <p class="text-center">You have not Approved any of today's tips, yet.</p>
                     </div>
                     {% endif %}

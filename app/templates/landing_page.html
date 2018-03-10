@@ -9,19 +9,16 @@
         rationally
         judge the purpose of Eanmblets. If you still cant, then well good luck mate.</p>
 </section>
+<hr>
+
+<h4 class="past-pred-h4">Past Predictions(History)</h4>
+
 <div id="past-data">
-    <h4>Past Predictions(History)</h4>
-
     {% for key, value in past_predictions.items() %}
+    <div class="table-div">
+    <h6 class="table-h">date>{{ key }}</h6>
+    <table class="">
 
-    <table class="table table-hover table-condensed">
-        <thead>
-        <tr>
-            <td colspan="5">
-                date>{{ key }}
-            </td>
-        </tr>
-        </thead>
         <tbody>
         <tr>
             <th>sport</th>
@@ -44,7 +41,7 @@
         {% else %}
         <tr>
             <td colspan="5">
-                <div class="jumbotron">
+                <div class="">
                     <p class="text-center">Seems like there were no approved predictions for this day.</p>
                 </div>
             </td>
@@ -52,19 +49,10 @@
         </tr>
         {% endif %}
         </tbody>
-        <tfoot>
-        <tr>
-            <td colspan="5">
-
-            </td>
-        </tr>
-        </tfoot>
     </table>
+    </div>
 
     {% endfor %}
 
 </div>
 {% endblock %}
-
-am having an idea of placing each and every of the other pages here on the landing page,..
-all being the fixed size of the viewport and then use parallax.

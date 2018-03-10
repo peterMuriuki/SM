@@ -19,6 +19,7 @@
 </div>
 {% endmacro %}
 
+<div class="main-users-div">
 <h1> {{ user.name}}( {{ user.user_name }} )</h1>
 <h2>General </h2>
 <form class="form-horizontal" acton="{{url_for('auth.profile', _external=True)}}" method="POST">
@@ -42,7 +43,7 @@
 <h2>update email</h2>
 <form class="form-horizontal" action="{{url_for('auth.profile', _external=True)}}" methods="POST">
 	{{ email_form.csrf_token() }}
-	{{ render_field(email_form.email) }}
+	{{ render_field(email_form.email, value=user.email) }}
 	{{ render_field(email_form.password) }}
 	{{ render_submit(email_form, class="btn btn-info btn-block") }}
 </form>
@@ -55,4 +56,5 @@
 	{{ render_submit(secondary_form, class="btn btn-info btn-block") }}
 </form>
 <hr>
+</div>
 {% endblock %}
