@@ -37,7 +37,7 @@ class Testing(TeDev):
 
 class Heroku(Config):
     """Different settings for heroku deployable application"""
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_base_uri, 'prod.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite://' + os.path.join(database_base_uri, 'prod.db')
 
 config = {
     'development': Config,
