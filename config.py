@@ -13,7 +13,6 @@ class Config(object):
     def init_app(app):
         pass
 
-
 class Production(Config):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'YT\x89\xc9\xed\x88K>}\t\x01\xf0\xe6\xc94\\\xde\x85\x96H\x11\x88\xe7\x8b'
     SQLALCHEMY_DATABASE_URI = ''
@@ -37,7 +36,7 @@ class Testing(TeDev):
 
 class Heroku(Config):
     """Different settings for heroku deployable application"""
-    SQLALCHEMY_DATABASE_URI = 'sqlite://' + os.path.join(database_base_uri, 'prod.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 config = {
     'development': Config,
