@@ -1,9 +1,9 @@
 """ Launch Script"""
 from flask_script import Manager, Shell, Server
-from app import create_app
+from app import create_app, db
 import os
 from app.users import Users
-from app import db
+
 
 
 app = create_app(os.environ.get('CONFIGURATION') or 'default')
@@ -11,7 +11,7 @@ manager = Manager(app=app)
 
 
 def make_shell_context():
-    return dict(app=app, Users=Users)
+    return dict(app=app, Users=Users, db=db)
 
 
 # manager.add_command('runserver', Server(host='0.0.0.0', port='9000')) use when developing on codeanywhere
@@ -28,12 +28,14 @@ def deploy():
             pass
         else:
             os.mkdir(database_base_uri)
+        return
     create_temp_database()
+
     db.drop_all()
     db.create_all()
 
     if os.environ['CONFIGURATION'] == 'production' or os.environ['CONFIGURATION'] == 'heroku':
-        Users.insert_admin() # will wok for all application configurations
+        Users.insert_admin() # will work for all application configurations
     else:
         Users.insert_test_admin()
 
