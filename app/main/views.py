@@ -123,9 +123,9 @@ def admin():
             # separate the predictions into sections: all - >predictions, staged -> ?, and approved-> approved
             approved, staged, fields = parse_predictions(predictions)
             if date_ == datetime.date.today():
-                filtered = False
-            else:
                 filtered = True
+            else:
+                filtered = False
             return render_template('admin/admin.html', predictions=predictions, approved=approved, staged=staged,
                                form=form, fields=fields, filtered=filtered, filter_form=filter_form)
         else:
