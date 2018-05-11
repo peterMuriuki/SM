@@ -17,7 +17,14 @@
 
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        
+        <!--jquery ui js and css-->
+        <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
+        <link rel="stylesheet" href="{{url_for('static', filename='css/jquery-ui.min.css')}}">
+        
+        <!-- custom js and css -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/pred.css') }}">
+        <script src="{{url_for('static', filename='js/eanmble.js')}}"></script>
     </head>
     <body>
     <header>
@@ -54,26 +61,132 @@
         </nav>
     </header>
     <div class="conainer-fluid main" id="main">
-
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                    aria-hidden="true">&times;</span></button>
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
         {% block content%}
         {%endblock content%}
 
     </div>
-    <footer>
-    </footer>
+    
+<!--Footer-->
+<footer class="page-footer font-small stylish-color-dark pt-4 mt-4">
+
+    <!--Footer Links-->
+    <div class="container text-center text-md-left">
+        <div class="row">
+
+            <!--First column-->
+            <div class="col-md-4">
+                <h5 class="text-uppercase mb-4 mt-3 font-weight-bold">Disclaimer</h5>
+                
+<p> Eanmble engineer and tipster aim at providing information that is 100% accuracy in teory, Eanmble does not quarantee such or any accuracy of data
+or information posted in here or third parties whose links appear on Eanmble.</p>
+            </div>
+            <!--/.First column-->
+
+            <hr class="clearfix w-100 d-md-none">
+
+            <!--Second column-->
+            <div class="col-md-2 mx-auto">
+                <h5 class="text-uppercase mb-4 mt-3 font-weight-bold">Eanmble Affiliates</h5>
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="eanmblesp.herokuapp.com" _target="blank">Eanmble sp</a>
+                    </li>
+                    
+                </ul>
+            </div>
+            <!--/.Second column-->
+
+            <hr class="clearfix w-100 d-md-none">
+
+            <!--Third column-->
+            <div class="col-md-2 mx-auto">
+                <h5 class="text-uppercase mb-4 mt-3 font-weight-bold">Noteworthy sites</h5>
+                <em>in no apparent order</em>
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="http://www.football-data.co.uk/" _target="blank">football-data</a>
+                    </li>
+                    <li>
+                        <a href="http://www.sportstats.com/soccer" _target="blank">sportstats</a>
+                    </li>
+                    <li>
+                        <a href="http://typersi.com" _target="blank">typersi</a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.Third column-->
+
+            <hr class="clearfix w-100 d-md-none">
+
+            <!--Fourth column-->
+            <div class="col-md-2 mx-auto">
+                <h5 class="text-uppercase mb-4 mt-3 font-weight-bold">Quick links</h5>
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="#!">conatact</a>
+                    </li>
+                    <li>
+                        <a href="#!">FAQS</a>
+                    </li>
+                    <li>
+                        <a href="#!">tems and conditions</a>
+                    </li>
+                    <li>
+                        <a href="#!">privacy policy</a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.Fourth column-->
+        </div>
+    </div>
+    <!--/.Footer Links-->
+
+    <hr>
+    {% if not current_user.is_authenticated %}
+    <!--Call to action-->
+    <div class="text-center py-3">
+        <ul class="list-unstyled list-inline mb-0">
+            <li class="list-inline-item">
+                <h5 class="mb-1">Register for free</h5>
+            </li>
+            <li class="list-inline-item">
+                <a href="#!" class="btn btn-danger btn-rounded">Sign up!</a>
+            </li>
+        </ul>
+    </div>
+    <!--/.Call to action-->
+    
+    <hr>
+    {% endif %}
+
+    <!--Social buttons-->
+    <div class="text-center">
+        <ul class="list-unstyled list-inline">
+            <li class="list-inline-item">
+                <a class="btn-floating btn-sm btn-fb mx-1">
+                    <i class="fa fa-facebook"> </i>
+                </a>
+            </li>
+            <li class="list-inline-item">
+                <a class="btn-floating btn-sm btn-tw mx-1">
+                    <i class="fa fa-twitter"> </i>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <!--/.Social buttons-->
+
+    <!--Copyright-->
+    <div class="footer-copyright py-3 text-center">
+        <p>age icon</p> © 2018 Copyright: Eanmble
+    </div>
+    <!--/.Copyright-->
+
+</footer>
+<!--/.Footer-->
+                      
+        
     </body>
 
     </html>

@@ -21,8 +21,8 @@
                     <form action="{{ url_for('main.admin') }}" , method="POST">
                         {{filter_form.csrf_token() }}
                         <div class="form-group">
-                            {{filter_form.date.label}}{{filter_form.date(class="form-control",
-                            placeholder="yyyy-mm-dd")}}
+                            {{filter_form.date.label}}{{filter_form.date(class="date-picker form-control",
+                            placeholder="yyyy-mm-dd", id="date-picker")}}
                         </div>
                         <div class="form-group">
 
@@ -60,7 +60,7 @@
                                 <td>{{prediction['odds']}}</td>
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
-                                {% if not filtered %}
+                                {% if filtered %}
                                 {% if prediction['approved'] == 1 %}
                                 {# logical error: this part is unnecessary #}
                                 <td><a class="pointer" href="{{ url_for('main.unstage', pred_id=prediction['id']) }}">
@@ -116,7 +116,7 @@
                                     <th>odds</th>
                                     <th>tipster name</th>
                                     <th> count</th>
-                                    {% if not filtered %}
+                                    {% if filtered %}
                                     <th colspan="2">Approval status</th>
                                     {% else %}
                                     <th>Approval status</th>
@@ -132,7 +132,7 @@
                                     </td>
                                     <td>{{ prediction['count'] }}</td>
                                     {# here we are either unstaging or approving #}
-                                    {% if not filtered %}
+                                    {% if filtered %}
                                     {% if prediction['approved'] == 1%}
                                     <td><a class="pointer"
                                            href="{{ url_for('main.unstage', pred_id=prediction['id']) }}">
@@ -141,6 +141,7 @@
                                     <td><a class="pointer" href="#" data-toggle="modal"
                                            data-target="#approve{{prediction['id']}}">
                                         <span></span> approve </a></td>
+                                    
                                     <!-- Modal -->
                                     <div id="approve{{prediction['id']}}" class="modal fade" role="dialog">
                                         <div class="modal-dialog">
@@ -148,16 +149,18 @@
                                             <!-- Modal content-->
                                             <div class="modal-content">
                                                 <div class="modal-header">
+                                                    <h4 class="modal-title">Approve Prediction</h4>
                                                     <button type="button" class="close"
                                                             data-dismiss="modal">&times;</button>
-                                                    <h4 class="modal-title">Approve Prediction</h4>
+                                                    
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="" method="POST"
                                                           action="{{ url_for('main.admin', pred_id=prediction['id'], _external=True) }}">
                                                         <div class="form-group">
+                                                            <em>add a few comments to justify your action:</em>
                                                             {{ form.csrf_token }}
-                                                            {{ form.confirmation_text() }}
+                                                            {{ form.confirmation_text(class="form-control", rows=10) }}
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-lg-4 col-md-4 col-sm-3 "></div>
@@ -203,7 +206,7 @@
                 </div>
                 <div class="approved-preds table-div">
                     <h3 class="table-h"> Approved Predictions </h3>
-                    {% if appoved|length %}
+                    {% if approved|length %}
                     <div class="table-responsive">
                         <table class="">
                             <tr>
@@ -213,7 +216,7 @@
                                 <th>odds</th>
                                 <th>tipster name</th>
                                 <th> count</th>
-                                {% if not filtered %}
+                                {% if filtered %}
                                 <th>Approval status</th>
                                 {% else %}
                                 <th colspan="2">Approval status</th>
@@ -228,7 +231,7 @@
                                 <td><a href="{{prediction['tipster_url']}}">{{ prediction['tipster_name'] }}</a></td>
                                 <td>{{ prediction['count'] }}</td>
                                 {# Here we can either unstage or disapprove #}
-                                {% if not filtered %}
+                                {% if filtered %}
                                 {% if prediction['approved'] == 2 %}
                                 <td><a class="pointer" href="#" data-toggle="modal"
                                        data-target="#disapprove{{prediction['id']}}">

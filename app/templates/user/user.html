@@ -36,25 +36,25 @@
             <section class="commentary">
                 <h5>Tipster's banter bottomline</h5>
                 {% for prediction in predictions%}
-                <h6>{{ prediction['fixture'] }}</h6>
+                <h6>{{ prediction['fixture'] }} &nbsp;&nbsp;({{prediction['pick']}}): &nbsp;&nbsp;
+                {{prediction['odds']}}</h6>
 
                 <p>{{ prediction['comment'] }}</p>
                 {% endfor %}
-                <h6> Your wagering Details</h6>
-                {#
-                <ol>#}
-                    {#
-                    <li>total odds: {{}}</li>
-                    #}
+                <h6> <strong>Your wagering Details</strong></h6>
+                
+                <ul>
+                    
+                    <li><em>total odds: {{ tot_odds }}</em></li>
                     {#
                     <li>stake: {{}}</li>
                     #}
                     {#
                     <li>Plausible win: {{}}</li>
                     #}
-                    {#
-                </ol>
-                #}
+                    
+                </ul>
+                
             </section>
             <hr>
             <!--Maybe here we can include predictions from the past day: check from the serevr if the predictions went
@@ -74,9 +74,9 @@
                         {% endfor %}
                         {{filter_form.csrf_token() }}
                         <div class="form-group">
-                            {{filter_form.first_date.label}}{{filter_form.first_date(class="form-control", value=_from, placeholder="Yyyy-mm-dd")
+                            {{filter_form.first_date.label}}{{filter_form.first_date(class="date-picker form-control", value=_from, placeholder="Yyyy-mm-dd")
                             }}
-                            {{filter_form.second_date.label}}{{filter_form.second_date(class="form-control", value=_to, placeholder="Yyyy-mm-dd")
+                            {{filter_form.second_date.label}}{{filter_form.second_date(class="date-picker form-control", value=_to, placeholder="Yyyy-mm-dd")
                             }}
                         </div>
 

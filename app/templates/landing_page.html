@@ -28,14 +28,14 @@
             <th>Odds</th>
             <th>Result</th>
         </tr>
-        {% if past_predictions[key]|length %}
+        {% if value|length %}
 
-        {% for prediction in past_predictions[key] %}
+        {% for prediction in value %}
         <tr>
             <td>{{ prediction['sport'] }}</td>
             <td>{{ prediction['fixture'] }}</td>
             <td>{{ prediction['pick'] }}</td>
-            <td>{{ prediction['odd'] }}</td>
+            <td>{{ prediction['odds'] }}</td>
             <td>{{ prediction['result'] }}</td>
         </tr>
         {% endfor %}

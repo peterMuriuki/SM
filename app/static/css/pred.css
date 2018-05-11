@@ -3,7 +3,7 @@
 	box-sizing: border-box;
 }
 body, html{
-	min-height: 100%;
+	min-height: 100vh;
 	font-family:'Kotta One', courier, monospace ;
 	font-size: 18px;
 }
@@ -17,7 +17,7 @@ body{
 }
 .main {
 	border-top: 1px solid;
-	height: 100%;
+	min-height: 100vh;
 	margin-top: 0;
 	background-color: rgba(0,0,0,0.8);
 	color: #fff7f7;
@@ -70,7 +70,7 @@ fieldset{
 form{
 	background-color: white;
 	padding: 40px;
-  color: black;
+    color: black;
 }
 .form-container{
 	margin-top:10px;
@@ -150,7 +150,6 @@ table tr:last-child td{
 	border-bottom: 0;
 }
 form{
-	border: 1px solid red;
 	font-size: smaller;
 	padding: 15px;
 	border-radius: 10px;
@@ -177,4 +176,8 @@ input[type="submit"]{
 input[type="submit"]:hover, input[type="submit"]:focus{
 	color: #fff;
 	background: #152337;
+}
+.stylish-color-dark{
+	background-color: rgba(50,50,70);
+	color: #fff;
 }

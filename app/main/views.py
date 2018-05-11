@@ -36,8 +36,9 @@ def home():
     """landing page render -> change of plan the landing page will display tables that display the last several
      advisories"""
     today = datetime.date.today()
-    past = today - datetime.timedelta(days=2)
-    end_date = today.strftime('%d-%m-%Y')
+    yesterday = today - datetime.timedelta(days=1)
+    past = today - datetime.timedelta(days=3)
+    end_date = yesterday.strftime('%d-%m-%Y')
     start_date = past.strftime('%d-%m-%Y')
     payload={
         '_from': start_date,
@@ -45,10 +46,12 @@ def home():
         'approved': 2
     }
 
+    
     set_header_token()
 
     pred_url = host_url + '''predictions/'''
     response = requests.get(pred_url, headers=headers, params=payload)
+#     import pdb;pdb.set_trace()
     if response.status_code == 200:
         return render_template('landing_page.html', past_predictions=response.json()['predictions'])
         # that returns a list of dictionaries with keys as datetime.strftime and values as list of predictions
@@ -88,6 +91,7 @@ def parse_predictions(predictions):
         if pred['approved'] == 2:
             approved.append(pred)
             fields['odds'] *= pred['odds']
+            round(fields['odds'], 2)
             fields['comment'] += str(pred['comment'])
         elif pred['approved'] == 1:
             staged.append(pred)
@@ -218,7 +222,7 @@ def stage(pred_id):
     _response = requests.put(pred_url, data=json.dumps(data), headers=headers)
     if _response.status_code == 201:
         # succesful modification return to admin
-        flash("Prediction unapproved", "success")
+        flash("Prediction staged", "success")
         return redirect(url_for('main.admin'))
     else:
         flash("Prediction still valid", 'danger')
@@ -272,7 +276,7 @@ def user_predictions():
     if filter_form.validate_on_submit() and filter_form.submit.data:
         _from = filter_form.first_date.data.strftime('%d-%m-%Y')
         _to = filter_form.second_date.data.strftime('%d-%m-%Y')
-        print(" I succesfully submitted")
+#         print(" I succesfully submitted")
     else:
         _from = past.strftime('%d-%m-%Y')
         _to = today.strftime('%d-%m-%Y')
@@ -288,7 +292,10 @@ def user_predictions():
         preds = response.json()  # -> a dictionary with list of dictionaries
         past_predictions = _response.json()['predictions']
         predictions = preds['predictions'][payload['_from']]
-        return render_template('user/user.html', predictions=predictions, filter_form=filter_form,
+        tot_odds = 1.00
+        for pred in predictions:
+            tot_odds *= pred['odds']
+        return render_template('user/user.html', predictions=predictions, filter_form=filter_form, tot_odds=round(tot_odds, 2),
                                past_predictions= past_predictions, _from=form_date_render(_from), _to=form_date_render(_to))
     elif response.status_code == 401:
         # unauthorized attempt

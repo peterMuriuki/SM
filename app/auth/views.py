@@ -33,7 +33,7 @@ def login():
     return render_template('user/login.html', form=form)
 
 
-@auth.route('/log_out')
+@auth.route('/logout')
 @login_required
 def logout():
     logout_user()  # removes and resets a user session

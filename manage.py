@@ -14,7 +14,7 @@ def make_shell_context():
     return dict(app=app, Users=Users, db=db)
 
 
-# manager.add_command('runserver', Server(host='0.0.0.0', port='9000')) use when developing on codeanywhere
+manager.add_command('runserver', Server(host='0.0.0.0', port='9000')) # use when developing on codeanywhere
 manager.add_command('shell', Shell(make_context=make_shell_context))
 
 
