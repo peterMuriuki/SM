@@ -26,7 +26,7 @@ class Users(UserMixin, db.Model):
 
     @property
     def password(self):
-        """Enforces integrity, one cannot password"""
+        """Enforces integrity, one cannot view password"""
         raise AttributeError('Password is write only')
 
     def verify_password(self, password):
@@ -41,10 +41,10 @@ class Users(UserMixin, db.Model):
 
     def __repr__(self):
         """__repr__"""
-        return "<user{} {} {} {}>".format(self.id, self.user_name, self.email, self.admin)
+        return "<user {} {} {} {}>".format(self.id, self.user_name, self.email, self.admin)
 
     def set_plan(self, plan):
-        """ Sets the plan as a string represetntations of the class name"""
+        """ Sets the plan as a string representation of the class name"""
         self.plan = plan
 
     def set_bankroll(self, bankroll):
@@ -117,7 +117,7 @@ class Users(UserMixin, db.Model):
         phone_number = os.environ.get('EANMBLE_ADMIN_PHONE_NUMBER')
         bankroll = None
         plan = None
-        admin = Users(name=name, user_name=user_name, email=email, password=password,
+    admin = Users(name=name, user_name=user_name, email=email, password=password,
                       admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
         try:
             db.session.add(admin)
