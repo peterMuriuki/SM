@@ -117,7 +117,7 @@ class Users(UserMixin, db.Model):
         phone_number = os.environ.get('EANMBLE_ADMIN_PHONE_NUMBER')
         bankroll = None
         plan = None
-    admin = Users(name=name, user_name=user_name, email=email, password=password,
+        admin = Users(name=name, user_name=user_name, email=email, password=password,
                       admin=admin, phone_number=phone_number, bankroll=bankroll, plan=plan)
         try:
             db.session.add(admin)
